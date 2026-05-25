@@ -1,56 +1,49 @@
 const usuariosService = require('../services/usuariosService');
 
-module.exports = {
-
-  getUsuarios: async (req, res) => {
+class UsuariosController {
+  async getUsuarios(req, res, next) {
     try {
       const usuarios = await usuariosService.obtenerUsuarios();
-      res.json({ success: true, usuarios });
+      res.json(usuarios);
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  },
-
-  crearUsuario: async (req, res) => {
-    try {
-      const data = req.body;
-      const result = await usuariosService.crearUsuario(data);
-
-      res.json({
-        success: true,
-        id: result.idUsuario,
-        message: "Usuario creado exitosamente."
-      });
-
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  },
-
-  actualizarUsuario: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const data = req.body;
-
-      await usuariosService.actualizarUsuario(id, data);
-
-      res.json({ success: true, message: "Usuario actualizado correctamente." });
-
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  },
-
-  eliminarUsuario: async (req, res) => {
-    try {
-      const { id } = req.params;
-      await usuariosService.eliminarUsuario(id);
-
-      res.json({ success: true, message: "Usuario eliminado correctamente." });
-
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      next(error);
     }
   }
 
-};
+  async crearUsuario(req, res, next) {
+    const { nombre, correo, contrasena, rol } = req.body;
+    try {
+      const id = await usuariosService.crearUsuario({ nombre, correo, contrasena, rol });
+      res.json({
+        success: true,
+        id,
+        message: 'Usuario creado exitosamente.'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async actualizarUsuario(req, res, next) {
+    const { id } = req.params;
+    const { nombre, correo, rol } = req.body;
+    try {
+      await usuariosService.actualizarUsuario(id, { nombre, correo, rol });
+      res.json({ success: true, message: 'Usuario actualizado correctamente.' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async eliminarUsuario(req, res, next) {
+    const { id } = req.params;
+    try {
+      await usuariosService.eliminarUsuario(id);
+      res.json({ success: true, message: 'Usuario eliminado correctamente.' });
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+module.exports = new UsuariosController();

@@ -1,31 +1,18 @@
 const authService = require('../services/authService');
 
-const login = async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const usuario = await authService.login(email, password);
-
-    return res.json({
-      success: true,
-      usuario
-    });
-
-  } catch (error) {
-
-    if (error.message === 'Credenciales Inválidas') {
-      return res.status(401).json({
-        success: false,
-        message: 'Credenciales inválidas'
+class AuthController {
+  async login(req, res, next) {
+    const { email, password } = req.body;
+    try {
+      const usuario = await authService.login(email, password);
+      res.json({
+        success: true,
+        usuario
       });
+    } catch (error) {
+      next(error);
     }
-
-    console.error('Error en login:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor'
-    });
   }
-};
+}
 
-module.exports = { login };
+module.exports = new AuthController();
