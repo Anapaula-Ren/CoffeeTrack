@@ -1,17 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const ctrl = require('../controllers/inventarioStockController');
-const mid = require('../middleware/inventarioStockMiddleware');
+const inventarioStockController = require('../controllers/inventarioStockController');
 
-router.get('/categorias', ctrl.getCategorias);
-router.get('/categoria/:idCategoria', ctrl.getProductosPorCategoria);
-router.get('/producto/:id', ctrl.getProducto);
-router.put('/producto/:id', mid.validarCantidad, ctrl.actualizarProducto);
-router.post('/producto', ctrl.crearProducto);
-router.delete('/producto/:id', ctrl.eliminarProducto);
-
-router.get('/completo', ctrl.getInventarioCompleto);
-router.get('/stock-critico', ctrl.getStockCritico);
-router.get('/stock-bajo', ctrl.getStockBajo);
+router.get('/status', inventarioStockController.getStatus);
+router.get('/categorias', inventarioStockController.getCategorias);
+router.get('/stock-bajo', inventarioStockController.getStockBajo);
+router.get('/vistas/inventario-completo', inventarioStockController.getInventarioCompleto);
+router.get('/vistas/stock-critico', inventarioStockController.getStockCritico);
+router.get('/categoria/:idCategoria', inventarioStockController.getProductosPorCategoria);
+router.get('/producto/:id', inventarioStockController.getProducto);
+router.post('/producto', inventarioStockController.crearProducto);
+router.put('/producto/:id', inventarioStockController.actualizarProducto);
+router.delete('/producto/:id', inventarioStockController.eliminarProducto);
 
 module.exports = router;
