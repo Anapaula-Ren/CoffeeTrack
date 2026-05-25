@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario Bebidas - CoffeeTrack</title>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/inventario.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <header>
+    <h1><i class="fa-solid fa-mug-saucer" style="color: #ffffff;"></i> CoffeeTrack</h1>
+    <nav>
+      <a href="../inicio/Inicio.html">Inicio</a>
+      <a href="../pedidos/GestionPedidos.html">Pedidos</a>
+      <a href="#" class="activo">Inventario</a>
+      <a href="../pedidos/Panel.html">Panel</a>
+      <a href="../usuarios/Usuarios.html" id="linkUsuarios" style="display:none;">Usuarios</a>
+      <a href="../../InicioDeSesion.html" id="btnCerrarSesion">Cerrar sesión</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="inv-page-header">
+      <h2><a href="inventario_menu.html">Inventario</a> / Bebidas</h2>
+      <button id="btnAgregarProducto" class="btn-agregar-producto">
+        <i class="fa-solid fa-circle-plus"></i> Agregar Producto
+      </button>
+    </div>
+
+    <section class="inventario">
+      <div class="cargando-inventario" style="grid-column: 1/-1; text-align: center; padding: 40px; color: #a1887f;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 32px; margin-bottom: 12px; display: block; opacity: 0.8;"></i>
+        <p style="font-size: 16px; font-weight: 500;">Cargando productos...</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Editar -->
+  <div id="modal_editar" class="modal" style="display:none;">
+    <div class="modal_contenido">
+      <span class="cerrar">&times;</span>
+      <h4>Actualizar Inventario</h4>
+      <form id="form_modal">
+        <div class="form_grupo">
+          <label>Producto:</label>
+          <input type="text" id="nombre_producto" readonly>
+        </div>
+        <div class="form_grupo">
+          <label for="cantidad_total">Cantidad disponible:</label>
+          <input type="number" id="cantidad_total" min="0" step="0.001" placeholder="Ingrese la cantidad">
+        </div>
+        <div class="botones_modal">
+          <button type="button" class="btn_cancelar">Cancelar</button>
+          <button type="submit" class="btn_guardar">Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Ordenar -->
+  <div id="ordenModal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:400px;">
+      <span class="close-button">&times;</span>
+      <h3>Ordenar <span id="productoTitulo"></span></h3>
+      <form id="ordenForm">
+        <input type="hidden" id="ordenProductoNombre">
+        <label for="ordenDestino">Correo del Proveedor:</label>
+        <input type="email" id="ordenDestino" placeholder="ejemplo@proveedor.com" required>
+        <label for="ordenCantidad">Cantidad a Ordenar:</label>
+        <input type="number" id="ordenCantidad" min="1" required>
+        <label for="ordenMotivo">Motivo/Urgencia (Opcional):</label>
+        <textarea id="ordenMotivo" rows="3"></textarea>
+        <button type="submit"
+          style="background-color:#5d4037; color:white; padding:10px 15px; border:none; border-radius:4px; cursor:pointer; width:100%; margin-top:10px;">
+          Enviar Orden por Correo
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Producto -->
+  <div id="modalAgregarProducto" class="modal" style="display:none;">
+    <div class="modal-agregar-contenido">
+      <div class="modal-agregar-header">
+        <div class="modal-agregar-icon"><i class="fa-solid fa-box-open"></i></div>
+        <h3>Agregar Producto</h3>
+        <p class="modal-agregar-sub">Se guardará en la categoría actual</p>
+      </div>
+      <form id="formAgregarProducto">
+        <div class="form_grupo">
+          <label for="nuevoNombreProducto"><i class="fa-solid fa-tag"></i> Nombre</label>
+          <input type="text" id="nuevoNombreProducto" placeholder="Ej: Jugo de naranja" required autocomplete="off">
+        </div>
+        <div class="form_grupo">
+          <label for="nuevaCantidadProducto"><i class="fa-solid fa-cubes"></i> Cantidad inicial</label>
+          <input type="number" id="nuevaCantidadProducto" min="0" step="0.001" value="0">
+        </div>
+        <div class="form_grupo">
+          <label for="nuevaImagenUrl"><i class="fa-solid fa-image"></i> URL de imagen <span
+              style="font-weight:400;color:#a1887f">(opcional)</span></label>
+          <input type="url" id="nuevaImagenUrl" placeholder="https://..." autocomplete="off">
+          <div id="previewWrap" style="display:none; margin-top:8px; text-align:center;">
+            <img id="previewImagen" src="" alt="Previsualización"
+              style="max-width:100%; max-height:120px; border-radius:8px; object-fit:contain; border:1.5px solid #e3d8d0;">
+          </div>
+        </div>
+        <div class="botones-agregar-modal">
+          <button type="button" class="btn-agregar-cancelar" onclick="cerrarModalAgregar()">
+            <i class="fa-solid fa-xmark"></i> Cancelar
+          </button>
+          <button type="submit" class="btn-agregar-guardar">
+            <i class="fa-solid fa-circle-plus"></i> Agregar Producto
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Confirmar Eliminar -->
+  <div id="modalEliminarProducto" class="modal" style="display:none;">
+    <div class="modal-eliminar-contenido">
+      <div class="modal-eliminar-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h3>¿Eliminar Producto?</h3>
+      <p>Estás a punto de eliminar permanentemente:</p>
+      <p class="nombre-eliminar" id="nombreProductoEliminar"></p>
+      <p class="advertencia-eliminar">Esta acción no se puede deshacer.</p>
+      <div class="botones-eliminar-modal">
+        <button type="button" class="btn-eliminar-cancelar" onclick="cerrarModalEliminar()">
+          <i class="fa-solid fa-xmark"></i> Cancelar
+        </button>
+        <button type="button" class="btn-eliminar-confirmar" id="btnConfirmarEliminar">
+          <i class="fa-solid fa-trash"></i> Sí, eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 CoffeeTrack. Todos los derechos reservados.</p>
+    <nav>
+      <a href="../legal/politica_privacidad.html">Política de privacidad</a> |
+      <a href="../legal/condiciones_servicio.html">Condiciones de servicio</a> |
+      <a href="../legal/preguntas_frecuentes.html">Preguntas frecuentes</a>
+    </nav>
+  </footer>
+
+  <script src="../../assets/js/inventario.js"></script>
+
+</body>
+
+</html>

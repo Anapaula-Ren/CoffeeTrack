@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Usuarios - CoffeeTrack</title>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/usuarios.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header>
+    <h1><i class="fa-solid fa-mug-saucer" style="color: #ffffff;"></i> CoffeeTrack</h1>
+    <nav>
+      <a href="../inicio/Inicio.html">Inicio</a>
+      <a href="../pedidos/GestionPedidos.html">Pedidos</a>
+      <a href="../Inventario/inventario_menu.html">Inventario</a>
+      <a href="../pedidos/Panel.html">Panel</a>
+      <a href="#" class="activo">Usuarios</a>
+      <a href="../../InicioDeSesion.html">Cerrar sesión</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="header-actions">
+        <h2>Gestión de Usuarios</h2>
+        <button class="btn-primary" onclick="openModal()">
+          <i class="fas fa-plus"></i> Nuevo Usuario
+        </button>
+      </div>
+
+      <table id="usersTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="usersList">
+          <tr>
+            <td colspan="5">Cargando usuarios...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal Agregar/Editar Usuario -->
+  <div id="userModal" class="modal">
+    <div class="modal-content user-modal-width">
+      <div class="modal-header-band">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-user-plus" id="modalTitleIcon"></i> 
+          <span id="modalTitle">Nuevo Usuario</span>
+        </h3>
+        <button type="button" class="modal-close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body-pad">
+        <form id="userForm">
+          <input type="hidden" id="userId">
+
+          <div class="form-group">
+            <label for="nombre">Nombre Completo:</label>
+            <input type="text" id="nombre" placeholder="Ej. Juan Pérez" required>
+          </div>
+
+          <div class="form-group">
+            <label for="correo">Correo Electrónico:</label>
+            <input type="email" id="correo" placeholder="ejemplo@correo.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="contrasena">Contraseña:</label>
+            <div style="position: relative; width: 100%; display: flex; align-items: center;">
+              <input type="password" id="contrasena" placeholder="Dejar en blanco si no cambia" style="padding-right: 40px; width: 100%;">
+              <button type="button" id="btnToggleContrasena" style="position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #8d6e63; padding: 0; display: flex; align-items: center; justify-content: center; outline: none; box-shadow: none; transition: color 0.2s;">
+                <i class="fa-solid fa-eye" id="iconoOjo" style="font-size: 1.15rem;"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="rol">Rol de Acceso:</label>
+            <select id="rol" required>
+              <option value="Administrador">Administrador</option>
+              <option value="Cajero/Mesero">Cajero/Mesero</option>
+              <option value="Encargado de inventario">Encargado de inventario</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" onclick="closeModal()" class="btn-cancelar">Cancelar</button>
+            <button type="submit" class="btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <p>© 2024 CoffeeTrack. Todos los derechos reservados.</p>
+      <nav class="footer-links">
+        <a href="../legal/condiciones_servicio.html">Condiciones de servicio</a> |
+        <a href="../legal/politica_privacidad.html">Política de privacidad</a> |
+        <a href="../legal/preguntas_frecuentes.html">Preguntas frecuentes</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    const API_URL = 'http://localhost:3000';
+    const modal     = document.getElementById('userModal');
+    const form      = document.getElementById('userForm');
+    const usersList = document.getElementById('usersList');
+
+    // ==================== VERIFICAR ACCESO ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      const rol = localStorage.getItem('usuarioRol');
+      if (rol !== 'Administrador') {
+        alert('Acceso denegado. Solo administradores.');
+        window.location.href = '../inicio/Inicio.html';
+        return;
+      }
+      loadUsers();
+      configurarToggleContrasena();
+    });
+
+    // ==================== TOGGLE CONTRASEÑA ====================
+    function configurarToggleContrasena() {
+      const btnToggle = document.getElementById('btnToggleContrasena');
+      const inputPass = document.getElementById('contrasena');
+      const iconoOjo = document.getElementById('iconoOjo');
+
+      if (btnToggle && inputPass && iconoOjo) {
+        btnToggle.addEventListener('click', () => {
+          const type = inputPass.getAttribute('type') === 'password' ? 'text' : 'password';
+          inputPass.setAttribute('type', type);
+          
+          if (type === 'password') {
+            iconoOjo.className = 'fa-solid fa-eye';
+            btnToggle.style.color = '#8d6e63';
+          } else {
+            iconoOjo.className = 'fa-solid fa-eye-slash';
+            btnToggle.style.color = '#5d4037';
+          }
+        });
+      }
+    }
+
+    // ==================== CARGAR USUARIOS ====================
+    async function loadUsers() {
+      try {
+        const res   = await fetch(`${API_URL}/api/usuarios`);
+        const users = await res.json();
+
+        usersList.innerHTML = '';
+        users.forEach(user => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${user.IdUsuario}</td>
+            <td>${user.Nombre}</td>
+            <td>${user.Correo}</td>
+            <td>
+              <span style="background: ${user.Rol === 'Administrador' ? '#e8f5e9' : '#fff3e0'};
+                           color:      ${user.Rol === 'Administrador' ? '#2e7d32' : '#ef6c00'};
+                           padding: 4px 8px; border-radius: 12px; font-size: 0.9em;">
+                ${user.Rol}
+              </span>
+            </td>
+            <td>
+              <button class="btn-action btn-edit" onclick='editUser(${JSON.stringify(user)})'>
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-action btn-delete" onclick="deleteUser(${user.IdUsuario})">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          `;
+          usersList.appendChild(row);
+        });
+
+      } catch (error) {
+        console.error(error);
+        usersList.innerHTML = '<tr><td colspan="5" style="color:red;">Error al cargar usuarios</td></tr>';
+      }
+    }
+
+    // ==================== MODAL ====================
+    function openModal(user = null) {
+      modal.style.display = 'flex';
+      const icon = document.getElementById('modalTitleIcon');
+
+      // Resetear la visibilidad de la contraseña al abrir
+      const inputPass = document.getElementById('contrasena');
+      const iconoOjo = document.getElementById('iconoOjo');
+      const btnToggle = document.getElementById('btnToggleContrasena');
+      if (inputPass && iconoOjo && btnToggle) {
+        inputPass.setAttribute('type', 'password');
+        iconoOjo.className = 'fa-solid fa-eye';
+        btnToggle.style.color = '#8d6e63';
+      }
+
+      if (user) {
+        document.getElementById('modalTitle').textContent = 'Editar Usuario';
+        if (icon) icon.className = 'fa-solid fa-user-pen';
+        document.getElementById('userId').value          = user.IdUsuario;
+        document.getElementById('nombre').value          = user.Nombre;
+        document.getElementById('correo').value          = user.Correo;
+        document.getElementById('rol').value             = user.Rol;
+        document.getElementById('contrasena').removeAttribute('required');
+        document.getElementById('contrasena').placeholder = 'Dejar en blanco para mantener actual';
+      } else {
+        document.getElementById('modalTitle').textContent = 'Nuevo Usuario';
+        if (icon) icon.className = 'fa-solid fa-user-plus';
+        form.reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('contrasena').setAttribute('required', 'true');
+        document.getElementById('contrasena').placeholder = '';
+      }
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    function editUser(user) {
+      openModal(user);
+    }
+
+    // ==================== ELIMINAR USUARIO ====================
+    async function deleteUser(id) {
+      if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+
+      try {
+        const res = await fetch(`${API_URL}/api/usuarios/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          loadUsers();
+        } else {
+          alert('Error al eliminar usuario');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Error de conexión');
+      }
+    }
+
+    // ==================== GUARDAR USUARIO ====================
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const id        = document.getElementById('userId').value;
+      const nombre    = document.getElementById('nombre').value;
+      const correo    = document.getElementById('correo').value;
+      const contrasena = document.getElementById('contrasena').value;
+      const rol       = document.getElementById('rol').value;
+
+      const data = { nombre, correo, rol };
+      if (contrasena) data.contrasena = contrasena;
+
+      try {
+        const url    = id ? `${API_URL}/api/usuarios/${id}` : `${API_URL}/api/usuarios`;
+        const method = id ? 'PUT' : 'POST';
+
+        const res    = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+          closeModal();
+          loadUsers();
+          alert(result.message);
+        } else {
+          alert(result.message || 'Error al guardar');
+        }
+
+      } catch (error) {
+        console.error(error);
+        alert('Error de conexión');
+      }
+    });
+
+    // ==================== CERRAR MODAL AL HACER CLIC FUERA ====================
+    window.onclick = function(event) {
+      if (event.target === modal) closeModal();
+    };
+  </script>
+
+</body>
+</html>

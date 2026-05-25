@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoffeeTrack - Pedidos</title>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pedidos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <header>
+    <h1><i class="fa-solid fa-mug-saucer" style="color: #ffffff;"></i> CoffeeTrack</h1>
+    <nav>
+      <a href="../inicio/Inicio.html">Inicio</a>
+      <a href="#" class="activo">Pedidos</a>
+      <a href="../Inventario/inventario_menu.html">Inventario</a>
+      <a href="Panel.html">Panel</a>
+      <a href="../usuarios/Usuarios.html" id="linkUsuarios" style="display:none;">Usuarios</a>
+      <a href="../../InicioDeSesion.html" id="btnCerrarSesion">Cerrar sesión</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 style="margin-bottom:0;">Pedidos</h2>
+      <button id="btnAddProduct" class="add" style="display:none; width:auto; padding:10px 20px;">
+        <i class="fa-solid fa-plus"></i> Agregar Producto
+      </button>
+    </div>
+
+    <div id="productsContainer" class="cards"></div>
+    <div class="actions"></div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>© 2025 CoffeeTrack. Todos los derechos reservados.</p>
+      <nav class="footer-links">
+        <a href="../legal/politica_privacidad.html">Política de privacidad</a> |
+        <a href="../legal/condiciones_servicio.html">Condiciones de servicio</a> |
+        <a href="../legal/preguntas_frecuentes.html">Preguntas frecuentes</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- Modal Resumen Pedido -->
+  <div id="resumenModal" class="modal" style="display:none;">
+    <div class="modal-content client-modal" style="max-width: 500px; padding: 20px;">
+
+      <!-- Encabezado Premium -->
+      <div class="modal-header-band"
+        style="background: linear-gradient(135deg, #5d4037, #3e2723); padding: 20px 25px; border-radius: 10px 10px 0 0; position: relative; margin: -20px -20px 20px -20px;">
+        <button type="button" class="modal-close-btn close-button" title="Cerrar"
+          style="position: absolute; right: 15px; top: 18px; background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h3 class="modal-title"
+          style="color: white; border-bottom: none; margin: 0; padding-bottom: 0; text-align: left; font-size: 1.3rem;">
+          Resumen de Pedido
+        </h3>
+      </div>
+
+      <!-- Cuerpo del Modal -->
+      <div style="padding: 15px 5px 5px 5px;">
+        <!-- Lista de Productos en el Pedido -->
+        <div
+          style="max-height: 250px; overflow-y: auto; margin-bottom: 20px; border-radius: 8px; border: 1.5px solid #eae1db; background: #fafafa; padding: 12px;">
+          <ul id="listaPedidoModal"
+            style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+            <!-- Renderizado dinámico -->
+          </ul>
+        </div>
+
+        <!-- Desglose de Totales con estilo premium -->
+        <div id="totalModal"
+          style="background: #fdfbf9; border: 1.5px solid #eae1db; border-radius: 8px; padding: 15px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 8px; color: #4e342e; font-size: 0.95rem;">
+          <!-- Renderizado dinámico de Subtotal, IVA y Total -->
+        </div>
+
+        <!-- Acciones Premium -->
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <button id="seguirAgregando" class="btn-cancel-client"
+            style="flex: 1; min-width: 180px; margin: 0; padding: 12px; font-weight: bold; background: #fffafa; border: 2px solid #efebe9; color: #795548; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-cart-plus"></i> Añadir Productos
+          </button>
+          <button id="cerrarYConfirmar" class="add btn-confirm-client"
+            style="flex: 1.2; min-width: 180px; margin: 0; padding: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-circle-check"></i> Cerrar y Confirmar
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Agregar Producto (Admin) -->
+  <div id="addProductModal" class="modal">
+    <div class="modal-content product-modal">
+
+      <!-- Encabezado con banda de color y X premium -->
+      <div class="modal-header-band">
+        <button type="button" class="modal-close-btn" id="btnCloseAddProduct" title="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h3 class="modal-title">Agregar Nuevo Producto</h3>
+      </div>
+
+      <!-- Cuerpo del formulario -->
+      <div class="modal-body-pad">
+        <form id="addProductForm" class="form-producto">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nombre:</label>
+              <input type="text" id="newProdName" required>
+            </div>
+            <div class="form-group">
+              <label>Precio ($):</label>
+              <input type="number" id="newProdPrice" step="0.50" required>
+            </div>
+            <div class="form-group">
+              <label>Categoría:</label>
+              <select id="newProdCategory" required>
+                <option value="">Cargando...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Stock Inicial:</label>
+              <input type="number" id="newProdStock" value="0" required>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Descripción:</label>
+            <textarea id="newProdDesc" rows="2"></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label>URL Imagen:</label>
+            <input type="url" id="newProdImage" placeholder="https://...">
+          </div>
+
+          <hr class="modal-divider">
+          <h4 class="recipe-title">Receta (Ingredientes)</h4>
+          <p class="recipe-desc">Define qué se descuenta del inventario al vender esto.</p>
+
+          <div id="listaIngredientesContainer" class="recipe-container"></div>
+
+          <div class="recipe-actions-row"
+            style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; margin-bottom: 20px; gap: 10px; flex-wrap: wrap;">
+            <button type="button" id="btnAgregarIngrediente" class="btn-secondary"
+              style="margin: 0; padding: 10px 16px; border-radius: 8px;">
+              <i class="fa-solid fa-plus"></i> Agregar Ingrediente
+            </button>
+            <a href="#" id="btnAbrirCrearInsumo" class="link-insumo"
+              style="margin: 0; font-size: 0.88rem; color: #8d6e63; text-decoration: none; border-bottom: 1.5px dashed #8d6e63; padding-bottom: 2px; font-weight: 600;">
+              <i class="fa-solid fa-circle-plus"></i> ¿Crear nuevo ingrediente?
+            </a>
+          </div>
+
+          <button type="submit" class="add btn-full" style="margin-top: 5px;">Guardar Producto</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Seleccionar Cliente -->
+  <div id="clienteInitModal" class="modal">
+    <div class="modal-content client-modal">
+      <h2 class="modal-title">Seleccionar Cliente</h2>
+      <p class="client-modal-desc">Identifica la orden antes de comenzar.</p>
+
+      <div id="estadoSeleccionado" class="client-selected-state" style="display:none;">
+        <p>Cliente: <strong><span id="lblClienteSeleccionado"></span></strong></p>
+        <button id="btnCancelarSeleccion" class="btn-cancel-link">Cambiar Cliente</button>
+      </div>
+
+      <div id="contenedorBusqueda">
+        <div class="client-search-container">
+          <input type="text" id="busquedaCliente" placeholder="Buscar cliente por nombre...">
+          <button id="btnBuscarCliente" class="add btn-search-client">
+            <i class="fa-solid fa-magnifying-glass"></i> Buscar
+          </button>
+        </div>
+
+        <div id="listaResultados" class="client-results" style="display:none;"></div>
+
+        <div class="form-group client-table-select">
+          <label for="selectMesaRapida">
+            <i class="fa-solid fa-utensils"></i> O seleccionar Mesa Rápida:
+          </label>
+          <div class="mesa-grid" id="mesaGrid">
+            <button class="mesa-card" data-value="1" data-label="Mesa 1">
+              <i class="fa-solid fa-chair"></i>
+              <span>Mesa 1</span>
+            </button>
+            <button class="mesa-card" data-value="2" data-label="Mesa 2">
+              <i class="fa-solid fa-chair"></i>
+              <span>Mesa 2</span>
+            </button>
+            <button class="mesa-card" data-value="3" data-label="Mesa 3">
+              <i class="fa-solid fa-chair"></i>
+              <span>Mesa 3</span>
+            </button>
+            <button class="mesa-card" data-value="4" data-label="Mesa 4">
+              <i class="fa-solid fa-chair"></i>
+              <span>Mesa 4</span>
+            </button>
+            <button class="mesa-card" data-value="5" data-label="Mesa 5">
+              <i class="fa-solid fa-chair"></i>
+              <span>Mesa 5</span>
+            </button>
+            <button class="mesa-card mesa-llevar" data-value="6" data-label="Para Llevar">
+              <i class="fa-solid fa-bag-shopping"></i>
+              <span>Para Llevar</span>
+            </button>
+          </div>
+          <select id="selectMesaRapida" style="display:none;">
+            <option value="">-- Seleccionar Mesa --</option>
+            <option value="1">Mesa 1</option>
+            <option value="2">Mesa 2</option>
+            <option value="3">Mesa 3</option>
+            <option value="4">Mesa 4</option>
+            <option value="5">Mesa 5</option>
+            <option value="6">Para Llevar/Barra</option>
+          </select>
+        </div>
+
+        <div id="formNuevoCliente" class="new-client-form" style="display:none;">
+          <div class="new-client-header">
+            <h4>Registrar Nuevo Cliente</h4>
+            <p>Añade un nuevo cliente a la base de datos.</p>
+          </div>
+          <div class="input-group">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="nuevoNombreCliente" placeholder="Nombre completo">
+          </div>
+          <div class="input-group">
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" id="nuevoEmailCliente" placeholder="Correo electrónico">
+          </div>
+          <div class="new-client-actions">
+            <button id="btnRegistrarCliente" class="btn-register-client">
+              <i class="fa-solid fa-check"></i> Registrar
+            </button>
+            <button id="btnCancelarRegistro" class="btn-cancel-client">
+              <i class="fa-solid fa-xmark"></i> Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <hr class="modal-divider">
+
+      <div class="client-modal-actions">
+        <button id="btnSalirPedidos" class="btn-secondary">Salir al Inicio</button>
+        <button id="btnConfirmarMesa" class="add btn-confirm-client" disabled>
+          Confirmar y Continuar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Nuevo Insumo -->
+  <div id="modalQuickInsumo" class="modal">
+    <div class="modal-content quick-insumo-modal">
+
+      <!-- Encabezado con banda verde e ícono de cierre premium -->
+      <div class="modal-header-band"
+        style="background: linear-gradient(135deg, #2e7d32, #4caf50); padding: 25px 30px; position: relative;">
+        <button type="button" class="modal-close-btn"
+          onclick="document.getElementById('modalQuickInsumo').style.display='none'" title="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h3 class="modal-title success-title"
+          style="color: #ffffff; border-bottom: none; padding-bottom: 0; margin: 0; text-align: left; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; text-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+          Nuevo Ingrediente</h3>
+      </div>
+
+      <!-- Cuerpo del modal -->
+      <div class="modal-body-pad" style="padding: 24px 30px;">
+        <form id="formQuickInsumo" class="form-producto">
+          <div class="form-group full-width">
+            <label>Nombre:</label>
+            <input type="text" id="qi_nombre" required>
+          </div>
+          <div class="form-group full-width">
+            <label>Categoría:</label>
+            <select id="qi_categoria">
+              <option value="1">Bebidas (Ingrediente)</option>
+              <option value="2">Comidas (Ingrediente)</option>
+              <option value="3">Envases</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label>Stock Inicial:</label>
+            <input type="number" id="qi_cantidad" value="0" required>
+          </div>
+          <div class="form-group full-width">
+            <label>URL Imagen (Opcional):</label>
+            <input type="text" id="qi_imagen" placeholder="https://...">
+          </div>
+          <button type="submit" class="add btn-full btn-success" style="margin-top: 15px;">Guardar Ingrediente</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Personalizar Bebida -->
+  <div id="personalizadoModal" class="modal" style="display:none;">
+    <div class="modal-content client-modal" style="max-width: 450px;">
+      <div class="modal-header-band"
+        style="background: linear-gradient(135deg, #5d4037, #3e2723); padding: 20px 25px; border-radius: 10px 10px 0 0; position: relative; margin: -20px -20px 20px -20px;">
+        <button type="button" class="modal-close-btn" id="btnClosePersonalizado" title="Cerrar"
+          style="position: absolute; right: 15px; top: 18px; background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h3 class="modal-title"
+          style="color: white; border-bottom: none; margin: 0; padding-bottom: 0; text-align: left; font-size: 1.3rem;">
+          Personalizar Bebida</h3>
+      </div>
+
+      <div style="padding: 10px 5px;">
+        <h4 id="persNombreProducto" style="text-align: left; margin: 0 0 15px 0; color: #5d4037; font-size: 1.25rem;">
+          Café con leche</h4>
+
+        <form id="formPersonalizado">
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="font-weight: 600; color: #4e342e; display: block; margin-bottom: 8px;">
+              <i class="fa-solid fa-droplet" style="color: #8d6e63; margin-right: 6px;"></i> Tipo de Leche:
+            </label>
+            <select id="persLeche" required
+              style="width: 100%; padding: 12px; border: 2px solid #eae1db; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #3e2723; background-color: #fafafa; transition: border-color 0.3s; outline: none;">
+              <option value="">Cargando opciones...</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 25px;">
+            <label style="font-weight: 600; color: #4e342e; display: block; margin-bottom: 10px;">
+              <i class="fa-solid fa-mug-hot" style="color: #8d6e63; margin-right: 6px;"></i> Shots de Café (Espresso):
+            </label>
+            <div class="shots-selector" style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button type="button" class="shot-btn" data-value="0"
+                style="flex: 1; min-width: 80px; padding: 12px; border: 2px solid #eae1db; background: white; color: #795548; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; outline: none;">No
+                aplica</button>
+              <button type="button" class="shot-btn active" data-value="1"
+                style="flex: 1; min-width: 80px; padding: 12px; border: 2px solid #8d6e63; background: #efebe9; color: #5d4037; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; outline: none;">1
+                Shot</button>
+              <button type="button" class="shot-btn" data-value="2"
+                style="flex: 1; min-width: 80px; padding: 12px; border: 2px solid #eae1db; background: white; color: #795548; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; outline: none;">2
+                Shots</button>
+              <button type="button" class="shot-btn" data-value="3"
+                style="flex: 1; min-width: 80px; padding: 12px; border: 2px solid #eae1db; background: white; color: #795548; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; outline: none;">3
+                Shots</button>
+            </div>
+            <input type="hidden" id="persShots" value="1">
+          </div>
+
+          <div style="display: flex; gap: 15px; margin-top: 30px;">
+            <button type="button" id="btnCancelarPersonalizado" class="btn-cancel-client"
+              style="flex: 1; margin: 0; padding: 12px;">Cancelar</button>
+            <button type="submit" class="add btn-confirm-client" style="flex: 1.5; margin: 0; padding: 12px;">Confirmar
+              Bebida</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Editar Receta -->
+  <div id="recetaModal" class="modal" style="display:none;">
+    <div class="modal-content client-modal" style="max-width: 500px; padding: 20px;">
+      
+      <!-- Encabezado Premium -->
+      <div class="modal-header-band" style="background: linear-gradient(135deg, #8d6e63, #5d4037); padding: 20px 25px; border-radius: 10px 10px 0 0; position: relative; margin: -20px -20px 20px -20px;">
+        <button type="button" class="modal-close-btn" id="btnCloseReceta" title="Cerrar" style="position: absolute; right: 15px; top: 18px; background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h3 class="modal-title" style="color: white; border-bottom: none; margin: 0; padding-bottom: 0; text-align: left; font-size: 1.3rem;">
+          <i class="fa-solid fa-mortar-pestle" style="color: #ffb74d; margin-right: 8px;"></i> Editar Receta Insumos
+        </h3>
+      </div>
+      
+      <!-- Cuerpo del Modal -->
+      <div style="padding: 15px 5px 5px 5px;">
+        <h4 id="recetaNombreProducto" style="text-align: left; margin: 0 0 10px 0; color: #5d4037; font-size: 1.25rem;">Producto</h4>
+        <p style="font-size: 0.85rem; color: #8d6e63; margin-bottom: 20px; text-align: left;">Define los ingredientes del inventario y las cantidades requeridas (en kg o litros) que se descontarán automáticamente al vender esta bebida.</p>
+        
+        <form id="formReceta">
+          <div id="recetaIngredientesContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; padding-right: 5px;">
+            <!-- Filas de ingredientes dinámicas -->
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 25px;">
+            <button type="button" id="btnRecetaAgregarIngrediente" class="btn-cancel-client" style="margin: 0; padding: 10px 15px; background: #fffafa; border: 2px solid #efebe9; color: #795548; font-weight: 600; display: flex; align-items: center; gap: 6px; font-size: 0.9rem; outline: none; cursor: pointer;">
+              <i class="fa-solid fa-plus"></i> Agregar Insumo
+            </button>
+          </div>
+          
+          <div style="display: flex; gap: 15px;">
+            <button type="button" id="btnCancelarReceta" class="btn-cancel-client" style="flex: 1; margin: 0; padding: 12px; font-weight: bold;">Cancelar</button>
+            <button type="submit" class="add btn-confirm-client" style="flex: 1.5; margin: 0; padding: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar Receta
+            </button>
+          </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+
+  <input type="hidden" id="idClienteFinal">
+
+  <script src="../../assets/js/gestionPedidos.js"></script>
+</body>
+
+</html>
