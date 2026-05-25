@@ -1,16 +1,15 @@
-const { getPool, sql } = require('../config/sql.js');
+const { sequelize, Sequelize } = require('../config/sql.js');
 
-module.exports = {
-
-  obtenerTopProductos: async (inicio, fin) => {
-    const pool = await getPool();
-
-    const result = await pool.request()
-      .input('fecha_inicio', sql.Date, inicio)
-      .input('fecha_fin', sql.Date, fin)
-      .execute('cafeteriadb.sp_top_productos');
-
-    return result.recordset;
+class ReportesModel {
+  static async obtenerTopProductos(inicio, fin) {
+    const [result] = await sequelize.query(
+      'EXEC cafeteriadb.sp_top_productos @fecha_inicio = :inicio, @fecha_fin = :fin',
+      {
+        replacements: { inicio, fin }
+      }
+    );
+    return result;
   }
+}
 
-};
+module.exports = ReportesModel;

@@ -1,11 +1,13 @@
 const clientesModel = require('../models/clientesModel');
 
-const buscarClientes = async (nombre) => {
-  return await clientesModel.buscarClientes(nombre);
-};
+class ClientesService {
+  async buscarClientes(nombre) {
+    return await clientesModel.buscarPorNombre(nombre);
+  }
 
-const crearCliente = async (nombre, email) => {
-  return await clientesModel.crearCliente(nombre, email);
-};
+  async crearCliente(nombre, email) {
+    return await clientesModel.crear(nombre, email);
+  }
+}
 
-module.exports = { buscarClientes, crearCliente };
+module.exports = new ClientesService();

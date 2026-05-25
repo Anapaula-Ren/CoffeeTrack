@@ -1,32 +1,23 @@
-const { getPool, sql } = require('../config/sql.js');
+const InventarioModel = require('./inventarioModel');
+const { Producto, Categoria } = InventarioModel.models;
 
-module.exports = {
-
-  obtenerMenu: async () => {
-    const pool = await getPool();
-    const result = await pool.request().query(`
-      SELECT 
-        p.IdProducto, 
-        p.Nombre, 
-        p.Descripcion, 
-        p.Precio, 
-        p.Stock, 
-        p.ImagenUrl, 
-        c.Nombre AS Categoria
-      FROM cafeteriadb.Productos p
-      JOIN cafeteriadb.Categorias c ON p.IdCategoria = c.IdCategoria
-      ORDER BY c.Nombre, p.Nombre
-    `);
-
-    return result.recordset;
-  },
-
-  obtenerCategorias: async () => {
-    const pool = await getPool();
-    const result = await pool.request()
-      .query(`SELECT * FROM cafeteriadb.Categorias`);
-    
-    return result.recordset;
+class MenuModel {
+  static async obtenerMenu() {
+    return await Producto.findAll({
+      include: {
+        model: Categoria,
+        required: true
+      },
+      order: [
+        [Categoria, 'Nombre', 'ASC'],
+        ['Nombre', 'ASC']
+      ]
+    });
   }
 
-};
+  static async obtenerCategorias() {
+    return await Categoria.findAll();
+  }
+}
+
+module.exports = MenuModel;

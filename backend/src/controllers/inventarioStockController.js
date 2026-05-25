@@ -1,86 +1,122 @@
-const service = require('../services/inventarioStockService');
+const inventarioStockService = require('../services/inventarioStockService');
 
-module.exports = {
-  getProducto: async (req, res) => {
+class InventarioStockController {
+  async getProducto(req, res, next) {
+    const { id } = req.params;
     try {
-      const producto = await service.obtenerProducto(req.params.id);
-      if (!producto) return res.status(404).json({ success: false, message: 'Producto no encontrado' });
-
+      const producto = await inventarioStockService.obtenerProducto(id);
+      if (!producto) {
+        return res.status(404).json({ success: false, message: 'Producto no encontrado' });
+      }
       res.json({ success: true, producto });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  },
-
-  actualizarProducto: async (req, res) => {
-    try {
-      const updated = await service.actualizarProducto(req.params.id, req.body.cantidad);
-      res.json({ success: true, updated });
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  },
-
-  getCategorias: async (req, res) => {
-    try {
-      const categorias = await service.obtenerCategorias();
-    res.json(categorias);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  getProductosPorCategoria: async (req, res) => {
-    try {
-      const productos = await service.obtenerProductosPorCategoria(req.params.idCategoria);
-      res.json(productos);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  crearProducto: async (req, res) => {
-    try {
-      const result = await service.crearProducto(req.body);
-      res.status(201).json({ success: true, id: result.IdInventario });
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  },
-
-  eliminarProducto: async (req, res) => {
-    try {
-      await service.eliminarProducto(req.params.id);
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  },
-
-  getInventarioCompleto: async (req, res) => {
-    try {
-      const data = await service.obtenerInventarioCompleto();
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  },
-
-  getStockCritico: async (req, res) => {
-    try {
-      const data = await service.obtenerStockCritico();
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  },
-
-  getStockBajo: async (req, res) => {
-    try {
-      const data = await service.obtenerStockBajo();
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      next(error);
     }
   }
-};
+
+  async actualizarProducto(req, res, next) {
+    const { id } = req.params;
+    const { cantidad } = req.body;
+    try {
+      const updatedProduct = await inventarioStockService.actualizarProducto(id, cantidad);
+      res.json({
+        success: true,
+        message: 'Producto actualizado correctamente',
+        cantidad_actualizada: parseFloat(cantidad),
+        producto: {
+          id: updatedProduct.IdInventario,
+          nombre: updatedProduct.NombreProducto,
+          cantidad: updatedProduct.Cantidad
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getProductosPorCategoria(req, res, next) {
+    const { idCategoria } = req.params;
+    try {
+      const productos = await inventarioStockService.obtenerProductosPorCategoria(idCategoria);
+      res.json(productos);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getCategorias(req, res, next) {
+    try {
+      const categorias = await inventarioStockService.obtenerCategorias();
+      res.json(categorias);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async crearProducto(req, res, next) {
+    try {
+      const id = await inventarioStockService.crearProducto(req.body);
+      res.status(201).json({
+        success: true,
+        message: 'Producto creado correctamente',
+        id
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async eliminarProducto(req, res, next) {
+    const { id } = req.params;
+    try {
+      await inventarioStockService.eliminarProducto(id);
+      res.json({ success: true, message: 'Producto eliminado correctamente' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getStatus(req, res, next) {
+    try {
+      const dbStatus = await inventarioStockService.obtenerStatusDB();
+      res.json({
+        status: 'ok',
+        database: dbStatus.database,
+        tablas: dbStatus.tablas,
+        total_productos: dbStatus.total_productos,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getInventarioCompleto(req, res, next) {
+    try {
+      const inventario = await inventarioStockService.obtenerInventarioCompleto();
+      res.json(inventario);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getStockCritico(req, res, next) {
+    try {
+      const criticos = await inventarioStockService.obtenerStockCritico();
+      res.json(criticos);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getStockBajo(req, res, next) {
+    try {
+      const bajo = await inventarioStockService.obtenerStockBajo();
+      res.json(bajo);
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+module.exports = new InventarioStockController();
