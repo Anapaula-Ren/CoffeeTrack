@@ -1,116 +1,164 @@
-const { getPool, sql } = require('../config/sql.js');
+const { sequelize, Sequelize } = require('../config/sql');
+const InventarioModel = require('./inventarioModel');
+const { Inventario, Receta } = InventarioModel.models;
 
-module.exports = {
-  obtenerProducto: async (id) => {
-    const pool = await getPool();
-    const result = await pool.request()
-      .input('id', sql.Int, id)
-      .query(`
-        SELECT IdInventario, NombreProducto, Cantidad
-        FROM cafeteriadb.inventario
-        WHERE IdInventario = @id
-      `);
-    return result.recordset[0] || null;
+class CategoriasInventario extends Sequelize.Model {}
+CategoriasInventario.init({
+  IdCategoriaInventario: {
+    type: Sequelize.DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
   },
-
-  actualizarCantidad: async (id, cantidad) => {
-    const pool = await getPool();
-    return await pool.request()
-      .input('cantidad', sql.Decimal(10, 3), cantidad)
-      .input('id', sql.Int, id)
-      .query(`
-        UPDATE cafeteriadb.inventario
-        SET Cantidad = @cantidad
-        WHERE IdInventario = @id
-      `);
+  Nombre: {
+    type: Sequelize.DataTypes.STRING,
+    allowNull: false
   },
+  Descripcion: {
+    type: Sequelize.DataTypes.STRING,
+    allowNull: true
+  }
+}, {
+  sequelize,
+  modelName: 'CategoriasInventario',
+  tableName: 'categorias_inventario',
+  schema: 'cafeteriadb',
+  timestamps: false
+});
 
-  obtenerCategorias: async () => {
-    const pool = await getPool();
-    const result = await pool.request().query(`
-      SELECT IdCategoriaInventario, Nombre, Descripcion
-      FROM cafeteriadb.categorias_inventario
-      ORDER BY Nombre
+// Relación
+Inventario.belongsTo(CategoriasInventario, { foreignKey: 'IdCategoriaInventario', as: 'CategoriaDetalle' });
+
+class InventarioStockModel {
+  static get sequelizeModel() {
+    return CategoriasInventario;
+  }
+
+  static async obtenerProducto(id) {
+    return await Inventario.findByPk(id);
+  }
+
+  static async actualizarProducto(id, cantidad) {
+    const affected = await Inventario.update(
+      { Cantidad: cantidad },
+      { where: { IdInventario: id } }
+    );
+    
+    if (affected[0] === 0) {
+      throw new Error('No se pudo actualizar - ninguna fila afectada');
+    }
+
+    return await Inventario.findByPk(id);
+  }
+
+  static async obtenerProductosPorCategoria(idCategoria) {
+    return await Inventario.findAll({
+      where: { IdCategoriaInventario: idCategoria },
+      include: {
+        model: CategoriasInventario,
+        as: 'CategoriaDetalle'
+      },
+      order: [['NombreProducto', 'ASC']]
+    });
+  }
+
+  static async obtenerCategorias() {
+    return await CategoriasInventario.findAll({
+      order: [['Nombre', 'ASC']]
+    });
+  }
+
+  static async crearProducto({ IdCategoriaInventario, NombreProducto, Cantidad, ImagenUrl }) {
+    const prod = await Inventario.create({
+      IdCategoriaInventario,
+      NombreProducto,
+      Cantidad,
+      ImagenUrl: ImagenUrl || null
+    });
+    return prod.IdInventario;
+  }
+
+  static async eliminarProducto(id) {
+    const t = await sequelize.transaction();
+    try {
+      // 1. Eliminar referencias del producto en recetas
+      await Receta.destroy({
+        where: { IdInventario: id },
+        transaction: t
+      });
+
+      // 2. Eliminar el producto de la tabla inventario
+      const deletedRows = await Inventario.destroy({
+        where: { IdInventario: id },
+        transaction: t
+      });
+
+      if (deletedRows === 0) {
+        throw new Error('Producto no encontrado en inventario');
+      }
+
+      await t.commit();
+      return true;
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
+  }
+
+  static async obtenerStatusDB() {
+    // Verificar conectividad simple
+    await sequelize.authenticate();
+
+    // Consulta de metadatos de las tablas
+    const [tablas] = await sequelize.query(`
+      SELECT TABLE_NAME 
+      FROM INFORMATION_SCHEMA.TABLES 
+      WHERE TABLE_SCHEMA = 'cafeteriadb' AND TABLE_NAME IN ('inventario', 'categorias_inventario')
     `);
-    return result.recordset;
-  },
 
-  obtenerProductosPorCategoria: async (idCategoria) => {
-    const pool = await getPool();
-    const result = await pool.request()
-      .input('idCategoria', sql.Int, idCategoria)
-      .query(`
-        SELECT i.IdInventario, i.NombreProducto, i.Cantidad, c.Nombre as Categoria
-        FROM cafeteriadb.inventario i
-        JOIN cafeteriadb.categorias_inventario c 
-          ON i.IdCategoriaInventario = c.IdCategoriaInventario
-        WHERE i.IdCategoriaInventario = @idCategoria
-        ORDER BY i.NombreProducto
-      `);
+    const tableNames = tablas.map(t => t.TABLE_NAME.toLowerCase());
+    const totalCount = await Inventario.count();
 
-    return result.recordset;
-  },
+    return {
+      database: 'conectado',
+      tablas: {
+        inventario: tableNames.includes('inventario'),
+        categorias_inventario: tableNames.includes('categorias_inventario')
+      },
+      total_productos: totalCount
+    };
+  }
 
-  crearProducto: async (data) => {
-    const { IdCategoriaInventario, NombreProducto, Cantidad } = data;
-    const pool = await getPool();
-
-    const result = await pool.request()
-      .input('IdCategoriaInventario', sql.Int, IdCategoriaInventario)
-      .input('NombreProducto', sql.NVarChar, NombreProducto)
-      .input('Cantidad', sql.Decimal(10, 3), Cantidad || 0)
-      .query(`
-        INSERT INTO cafeteriadb.inventario (IdCategoriaInventario, NombreProducto, Cantidad)
-        OUTPUT INSERTED.IdInventario
-        VALUES (@IdCategoriaInventario, @NombreProducto, @Cantidad)
-      `);
-
-    return result.recordset[0];
-  },
-
-  eliminarProducto: async (id) => {
-    const pool = await getPool();
-    return await pool.request()
-      .input('id', sql.Int, id)
-      .query('DELETE FROM cafeteriadb.inventario WHERE IdInventario = @id');
-  },
-
-  obtenerInventarioCompleto: async () => {
-    const pool = await getPool();
-    const result = await pool.request().query(`
+  static async obtenerInventarioCompleto() {
+    // Consulta directa de vista SQL Server
+    const [result] = await sequelize.query(`
       SELECT * FROM cafeteriadb.vw_inventario_completo
       ORDER BY Categoria, Nombre
     `);
-    return result.recordset;
-  },
+    return result;
+  }
 
-  obtenerStockCritico: async () => {
-    const pool = await getPool();
-    const result = await pool.request().query(`
+  static async obtenerStockCritico() {
+    // Consulta directa de vista SQL Server
+    const [result] = await sequelize.query(`
       SELECT * FROM cafeteriadb.vw_stock_critico
       ORDER BY Cantidad ASC
     `);
-    return result.recordset;
-  },
-
-  obtenerStockBajo: async () => {
-    const pool = await getPool();
-    const result = await pool.request().query(`
-      SELECT
-        i.IdInventario as ID,
-        i.NombreProducto as Nombre,
-        c.Nombre as Categoria,
-        i.Cantidad as Cantidad,
-        CASE
-          WHEN i.Cantidad <= 2 THEN 'CRÍTICO'
-          WHEN i.Cantidad <= 5 THEN 'BAJO'
-          ELSE 'NORMAL'
-        END as Estado
-      FROM cafeteriadb.inventario i
-      JOIN cafeteriadb.categorias_inventario c ON i.IdCategoriaInventario = c.IdCategoriaInventario
-      WHERE i.Cantidad < 5
-      ORDER BY i.Cantidad ASC
-    `);
-    return result.recordset;
+    return result;
   }
-};
+
+  static async obtenerStockBajo() {
+    const { Op } = Sequelize;
+    return await Inventario.findAll({
+      where: {
+        Cantidad: { [Op.lt]: 5 }
+      },
+      include: {
+        model: CategoriasInventario,
+        as: 'CategoriaDetalle'
+      },
+      order: [['Cantidad', 'ASC']]
+    });
+  }
+}
+
+module.exports = InventarioStockModel;

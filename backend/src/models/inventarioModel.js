@@ -1,94 +1,197 @@
-const { getPool, sql } = require('../config/sql.js');
+const { sequelize, Sequelize } = require('../config/sql');
 
-module.exports = {
-
-  obtenerBebidas: async () => {
-    const pool = await getPool();
-    const result = await pool.request().query(`
-      SELECT p.IdProducto, p.Nombre, p.Descripcion, p.Precio, p.Stock, p.ImagenUrl
-      FROM cafeteriadb.Productos p
-      JOIN cafeteriadb.Categorias c ON p.IdCategoria = c.IdCategoria
-      WHERE c.Nombre = 'Bebidas'
-      ORDER BY p.Nombre
-    `);
-    return result.recordset;
+// 1. Definición de Modelos Sequelize
+class Categoria extends Sequelize.Model {}
+Categoria.init({
+  IdCategoria: {
+    type: Sequelize.DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
   },
+  Nombre: Sequelize.DataTypes.STRING
+}, {
+  sequelize,
+  modelName: 'Categoria',
+  tableName: 'Categorias',
+  schema: 'cafeteriadb',
+  timestamps: false
+});
 
-  actualizarStock: async (id, stock) => {
-    const pool = await getPool();
-    await pool.request()
-      .input('stock', sql.Int, stock)
-      .input('id', sql.Int, id)
-      .query(`
-        UPDATE cafeteriadb.Productos
-        SET Stock = @stock
-        WHERE IdProducto = @id
-      `);
+class Producto extends Sequelize.Model {}
+Producto.init({
+  IdProducto: {
+    type: Sequelize.DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
   },
+  Nombre: Sequelize.DataTypes.STRING,
+  Descripcion: Sequelize.DataTypes.STRING,
+  Precio: Sequelize.DataTypes.DECIMAL(10, 2),
+  Stock: Sequelize.DataTypes.INTEGER,
+  IdCategoria: Sequelize.DataTypes.INTEGER,
+  ImagenUrl: Sequelize.DataTypes.STRING
+}, {
+  sequelize,
+  modelName: 'Producto',
+  tableName: 'Productos',
+  schema: 'cafeteriadb',
+  timestamps: false
+});
 
-  crearProducto: async (data) => {
-    const { Nombre, Descripcion, Precio, Stock, IdCategoria, Imagen } = data;
-
-    const pool = await getPool();
-    const result = await pool.request()
-      .input('Nombre', sql.NVarChar, Nombre)
-      .input('Descripcion', sql.NVarChar, Descripcion)
-      .input('Precio', sql.Decimal, Precio)
-      .input('Stock', sql.Int, Stock)
-      .input('IdCategoria', sql.Int, IdCategoria)
-      .input('Imagen', sql.NVarChar, Imagen)
-      .query(`
-        INSERT INTO cafeteriadb.Productos (Nombre, Descripcion, Precio, Stock, IdCategoria, ImagenUrl)
-        OUTPUT INSERTED.IdProducto
-        VALUES (@Nombre, @Descripcion, @Precio, @Stock, @IdCategoria, @Imagen)
-      `);
-
-    return result.recordset[0].IdProducto;
+class Inventario extends Sequelize.Model {}
+Inventario.init({
+  IdInventario: {
+    type: Sequelize.DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
   },
+  IdCategoriaInventario: Sequelize.DataTypes.INTEGER,
+  NombreProducto: Sequelize.DataTypes.STRING,
+  Cantidad: Sequelize.DataTypes.DECIMAL(10, 3),
+  ImagenUrl: Sequelize.DataTypes.STRING
+}, {
+  sequelize,
+  modelName: 'Inventario',
+  tableName: 'inventario',
+  schema: 'cafeteriadb',
+  timestamps: false
+});
 
-  obtenerInsumos: async () => {
-    const pool = await getPool();
-    const result = await pool.request().query(`
-      SELECT IdInventario, NombreProducto, CantidadDisponible, UnidadMedida
-      FROM cafeteriadb.Inventario
-      ORDER BY NombreProducto
-    `);
-    return result.recordset;
+class Receta extends Sequelize.Model {}
+Receta.init({
+  IdProducto: {
+    type: Sequelize.DataTypes.INTEGER,
+    primaryKey: true
   },
-
-  crearProductoConReceta: async (data) => {
-    const { Nombre, Descripcion, Precio, Stock, IdCategoria, Imagen } = data;
-
-    const pool = await getPool();
-    const result = await pool.request()
-      .input('Nombre', sql.NVarChar, Nombre)
-      .input('Descripcion', sql.NVarChar, Descripcion)
-      .input('Precio', sql.Decimal, Precio)
-      .input('Stock', sql.Int, Stock)
-      .input('IdCategoria', sql.Int, IdCategoria)
-      .input('Imagen', sql.NVarChar, Imagen)
-      .query(`
-        INSERT INTO cafeteriadb.Productos (Nombre, Descripcion, Precio, Stock, IdCategoria, ImagenUrl)
-        OUTPUT INSERTED.IdProducto
-        VALUES (@Nombre, @Descripcion, @Precio, @Stock, @IdCategoria, @Imagen)
-      `);
-
-    return result.recordset[0].IdProducto;
+  IdInventario: {
+    type: Sequelize.DataTypes.INTEGER,
+    primaryKey: true
   },
+  CantidadInsumo: Sequelize.DataTypes.DECIMAL(10, 3)
+}, {
+  sequelize,
+  modelName: 'Receta',
+  tableName: 'recetas',
+  schema: 'cafeteriadb',
+  timestamps: false
+});
 
-  guardarReceta: async (idProducto, receta) => {
-    const pool = await getPool();
+// Relaciones
+Producto.belongsTo(Categoria, { foreignKey: 'IdCategoria' });
+Receta.belongsTo(Inventario, { foreignKey: 'IdInventario' });
 
-    for (const item of receta) {
-      await pool.request()
-        .input('IdProducto', sql.Int, idProducto)
-        .input('IdInventario', sql.Int, item.IdInventario)
-        .input('CantidadInsumo', sql.Decimal, item.CantidadInsumo)
-        .query(`
-          INSERT INTO cafeteriadb.ProductosRecetas (IdProducto, IdInventario, CantidadInsumo)
-          VALUES (@IdProducto, @IdInventario, @CantidadInsumo)
-        `);
+class InventarioModel {
+  static get models() {
+    return { Producto, Categoria, Inventario, Receta };
+  }
+
+  static async obtenerBebidas() {
+    return await Producto.findAll({
+      include: {
+        model: Categoria,
+        where: { Nombre: 'Bebidas' }
+      },
+      order: [['Nombre', 'ASC']]
+    });
+  }
+
+  static async actualizarStock(id, stock) {
+    await Producto.update({ Stock: stock }, { where: { IdProducto: id } });
+  }
+
+  static async crearProducto({ Nombre, Descripcion, Precio, Stock, IdCategoria, Imagen }) {
+    const prod = await Producto.create({
+      Nombre,
+      Descripcion,
+      Precio,
+      Stock,
+      IdCategoria,
+      ImagenUrl: Imagen || null
+    });
+    return prod.IdProducto;
+  }
+
+  static async obtenerInsumos() {
+    return await Inventario.findAll({
+      attributes: ['IdInventario', 'NombreProducto'],
+      order: [['NombreProducto', 'ASC']]
+    });
+  }
+
+  static async crearNuevoInsumo({ nombre, categoria, cantidad, imagen }) {
+    const insumo = await Inventario.create({
+      IdCategoriaInventario: categoria,
+      NombreProducto: nombre,
+      Cantidad: cantidad || 0,
+      ImagenUrl: imagen || null
+    });
+    return insumo.IdInventario;
+  }
+
+  static async crearProductoConReceta({ Nombre, Descripcion, Precio, Stock, IdCategoria, Imagen, Receta: ingredientes }, tTransaction = null) {
+    const useTransaction = tTransaction || await sequelize.transaction();
+    try {
+      const prod = await Producto.create({
+        Nombre,
+        Descripcion,
+        Precio,
+        Stock,
+        IdCategoria,
+        ImagenUrl: Imagen || null
+      }, { transaction: useTransaction });
+
+      if (ingredientes && Array.isArray(ingredientes) && ingredientes.length > 0) {
+        for (const ing of ingredientes) {
+          await Receta.create({
+            IdProducto: prod.IdProducto,
+            IdInventario: ing.IdInventario,
+            CantidadInsumo: ing.CantidadInsumo
+          }, { transaction: useTransaction });
+        }
+      }
+
+      if (!tTransaction) await useTransaction.commit();
+      return prod.IdProducto;
+    } catch (err) {
+      if (!tTransaction) await useTransaction.rollback();
+      throw err;
     }
   }
 
-};
+  static async obtenerReceta(idProducto) {
+    return await Receta.findAll({
+      where: { IdProducto: idProducto },
+      include: {
+        model: Inventario,
+        attributes: ['NombreProducto']
+      }
+    });
+  }
+
+  static async actualizarReceta(idProducto, ingredientes) {
+    const t = await sequelize.transaction();
+    try {
+      await Receta.destroy({
+        where: { IdProducto: idProducto },
+        transaction: t
+      });
+
+      if (ingredientes && Array.isArray(ingredientes) && ingredientes.length > 0) {
+        for (const ing of ingredientes) {
+          await Receta.create({
+            IdProducto: idProducto,
+            IdInventario: ing.IdInventario,
+            CantidadInsumo: ing.CantidadInsumo
+          }, { transaction: t });
+        }
+      }
+
+      await t.commit();
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
+  }
+}
+
+module.exports = InventarioModel;
