@@ -1,59 +1,73 @@
 const inventarioModel = require('../models/inventarioModel');
 const nodemailer = require('nodemailer');
+const { AppError } = require('../middleware/errorHandler');
 
-module.exports = {
-
-  obtenerBebidas: async () => {
+class InventarioService {
+  async obtenerBebidas() {
     return await inventarioModel.obtenerBebidas();
-  },
+  }
 
-  actualizarStock: async (id, stock) => {
-    if (stock < 0) throw new Error("El stock no puede ser negativo");
-    await inventarioModel.actualizarStock(id, stock);
-  },
+  async actualizarStock(id, stock) {
+    return await inventarioModel.actualizarStock(id, stock);
+  }
 
-  crearProducto: async (data) => {
+  async crearProducto(data) {
     return await inventarioModel.crearProducto(data);
-  },
+  }
 
-  obtenerInsumos: async () => {
-    return await inventarioModel.obtenerInsumos();
-  },
+  async enviarOrdenCompra({ producto, cantidad, motivo, destino, usuarioNombre }) {
+    const emailUser = process.env.EMAIL || process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS;
 
-  crearProductoConReceta: async (data) => {
-    const idProducto = await inventarioModel.crearProductoConReceta(data);
-
-    if (data.Receta && data.Receta.length > 0) {
-      await inventarioModel.guardarReceta(idProducto, data.Receta);
+    if (!emailUser || !emailPass) {
+      throw new AppError('Configuración de correo incompleta en el servidor.', 500);
     }
-
-    return idProducto;
-  },
-
-  enviarOrdenCompra: async ({ producto, cantidad, motivo, destino, usuarioNombre }) => {
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: emailUser,
+        pass: emailPass
       }
     });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+    const info = await transporter.sendMail({
+      from: emailUser,
       to: destino,
-      subject: `ORDEN DE COMPRA: ${producto} - URGENCIA`,
+      subject: `ORDEN DE COMPRA: ${producto} - URGENCIAS`,
       html: `
-        <h3>Solicitud de Orden de Compra</h3>
-        <p>Empleado: <strong>${usuarioNombre || 'Sistema'}</strong></p>
-        <p><strong>Producto:</strong> ${producto}</p>
-        <p><strong>Cantidad:</strong> ${cantidad}</p>
-        <p><strong>Motivo:</strong> ${motivo || 'No especificado'}</p>
+        <h3>Nueva Solicitud de Orden de Compra</h3>
+        <p>El empleado ${usuarioNombre || 'Sistema'} ha solicitado una orden urgente de inventario.</p>
+        <hr>
+        <p><strong>Producto Solicitado:</strong> ${producto}</p>
+        <p><strong>Cantidad a Ordenar:</strong> ${cantidad} unidades</p>
+        <p><strong>Motivo / Observaciones:</strong> ${motivo || 'No especificado'}</p>
+        <p>Por favor, procesar esta orden lo antes posible.</p>
       `
     });
 
-    return true;
+    return info.messageId;
   }
 
-};
+  async obtenerInsumos() {
+    return await inventarioModel.obtenerInsumos();
+  }
+
+  async crearNuevoInsumo(data) {
+    return await inventarioModel.crearNuevoInsumo(data);
+  }
+
+  async crearProductoConReceta(data) {
+    return await inventarioModel.crearProductoConReceta(data);
+  }
+
+  async obtenerReceta(idProducto) {
+    return await inventarioModel.obtenerReceta(idProducto);
+  }
+
+  async actualizarReceta(idProducto, receta) {
+    return await inventarioModel.actualizarReceta(idProducto, receta);
+  }
+}
+
+module.exports = new InventarioService();

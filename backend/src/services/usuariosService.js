@@ -1,27 +1,36 @@
+const bcrypt = require('bcrypt');
 const usuariosModel = require('../models/usuariosModel');
+const { AppError } = require('../middleware/errorHandler');
 
-module.exports = {
-
-  obtenerUsuarios: async () => {
+class UsuariosService {
+  async obtenerUsuarios() {
     return await usuariosModel.obtenerUsuarios();
-  },
+  }
 
-  crearUsuario: async (data) => {
-    const { correo } = data;
-
+  async crearUsuario({ nombre, correo, contrasena, rol }) {
     const existente = await usuariosModel.buscarPorCorreo(correo);
     if (existente) {
-      throw new Error("El correo ya está registrado.");
+      throw new AppError('El correo ya está registrado.', 400);
     }
 
-    const idUsuario = await usuariosModel.insertarUsuario(data);
-    return { idUsuario };
-  },
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(contrasena, saltRounds);
 
-  actualizarUsuario: async (id, data) =>
-    await usuariosModel.actualizarUsuario(id, data),
+    return await usuariosModel.insertarUsuario({
+      nombre,
+      correo,
+      contrasena: hashedPassword,
+      rol
+    });
+  }
 
-  eliminarUsuario: async (id) =>
-    await usuariosModel.eliminarUsuario(id)
+  async actualizarUsuario(id, data) {
+    return await usuariosModel.actualizarUsuario(id, data);
+  }
 
-};
+  async eliminarUsuario(id) {
+    return await usuariosModel.eliminarUsuario(id);
+  }
+}
+
+module.exports = new UsuariosService();

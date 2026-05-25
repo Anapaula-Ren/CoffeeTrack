@@ -1,40 +1,45 @@
-const model = require('../models/inventarioStockModel');
+const inventarioStockModel = require('../models/inventarioStockModel');
 
-module.exports = {
-  obtenerProducto: async (id) => {
-    return await model.obtenerProducto(id);
-  },
-
-  actualizarProducto: async (id, cantidad) => {
-    await model.actualizarCantidad(id, cantidad);
-    return await model.obtenerProducto(id);
-  },
-
-  obtenerCategorias: async () => {
-    return await model.obtenerCategorias();
-  },
-
-  obtenerProductosPorCategoria: async (idCategoria) => {
-    return await model.obtenerProductosPorCategoria(idCategoria);
-  },
-
-  crearProducto: async (data) => {
-    return await model.crearProducto(data);
-  },
-
-  eliminarProducto: async (id) => {
-    return await model.eliminarProducto(id);
-  },
-
-  obtenerInventarioCompleto: async () => {
-    return await model.obtenerInventarioCompleto();
-  },
-
-  obtenerStockCritico: async () => {
-    return await model.obtenerStockCritico();
-  },
-
-  obtenerStockBajo: async () => {
-    return await model.obtenerStockBajo();
+class InventarioStockService {
+  async obtenerProducto(id) {
+    return await inventarioStockModel.obtenerProducto(id);
   }
-};
+
+  async actualizarProducto(id, cantidad) {
+    return await inventarioStockModel.actualizarProducto(id, cantidad);
+  }
+
+  async obtenerProductosPorCategoria(idCategoria) {
+    return await inventarioStockModel.obtenerProductosPorCategoria(idCategoria);
+  }
+
+  async obtenerCategorias() {
+    return await inventarioStockModel.obtenerCategorias();
+  }
+
+  async crearProducto(data) {
+    return await inventarioStockModel.crearProducto(data);
+  }
+
+  async eliminarProducto(id) {
+    return await inventarioStockModel.eliminarProducto(id);
+  }
+
+  async obtenerStatusDB() {
+    return await inventarioStockModel.obtenerStatusDB();
+  }
+
+  async obtenerInventarioCompleto() {
+    return await inventarioStockModel.obtenerInventarioCompleto();
+  }
+
+  async obtenerStockCritico() {
+    return await inventarioStockModel.obtenerStockCritico();
+  }
+
+  async obtenerStockBajo() {
+    return await inventarioStockModel.obtenerStockBajo();
+  }
+}
+
+module.exports = new InventarioStockService();

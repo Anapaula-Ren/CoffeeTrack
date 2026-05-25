@@ -1,25 +1,39 @@
 const bcrypt = require('bcrypt');
-const usuarioModel = require('../models/usuariosModel');
+const usuariosModel = require('../models/usuariosModel');
+const { AppError } = require('../middleware/errorHandler');
 
-const login = async (email, password) => {
-  const usuario = await usuarioModel.findByEmail(email);
+class AuthService {
+  async login(email, password) {
+    const usuario = await usuariosModel.buscarPorCorreo(email);
+    if (!usuario) {
+      throw new AppError('Credenciales inválidas', 401);
+    }
 
-  if (!usuario) {
-    throw new Error('Credenciales Inválidas');
+    let passwordMatch = false;
+
+    // 1. Intentar validar usando bcrypt
+    try {
+      passwordMatch = await bcrypt.compare(password, usuario.Contrasena);
+    } catch (error) {
+      passwordMatch = false;
+    }
+
+    // 2. Si falla bcrypt, intentar texto plano (soporte híbrido)
+    if (!passwordMatch) {
+      passwordMatch = (password === usuario.Contrasena);
+    }
+
+    if (!passwordMatch) {
+      throw new AppError('Credenciales inválidas', 401);
+    }
+
+    return {
+      IdUsuario: usuario.IdUsuario,
+      Nombre: usuario.Nombre,
+      Rol: usuario.Rol,
+      Correo: usuario.Correo
+    };
   }
+}
 
-  const passwordMatch = await bcrypt.compare(password, usuario.Contrasena);
-
-  if (!passwordMatch) {
-    throw new Error('Credenciales Inválidas');
-  }
-
-  return {
-    IdUsuario: usuario.IdUsuario,
-    Nombre: usuario.Nombre,
-    Rol: usuario.Rol,
-    Correo: usuario.Correo
-  };
-};
-
-module.exports = { login };
+module.exports = new AuthService();
