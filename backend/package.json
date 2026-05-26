@@ -6,6 +6,11 @@
   "scripts": {
     "test": "jest"
   },
+  "jest": {
+    "testMatch": ["**/src/tests/**/*Test.js"],
+    "testEnvironment": "node",
+    "verbose": true
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
