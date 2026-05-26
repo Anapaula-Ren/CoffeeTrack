@@ -1,12 +1,38 @@
 ﻿const request = require('supertest');
+const express = require('express');
 
 jest.mock('../config/sql', () => ({
   sequelize: {
     authenticate: jest.fn().mockResolvedValue(true),
+    transaction: jest.fn(),
+    query: jest.fn(),
     define: jest.fn(),
     sync: jest.fn(),
   },
-  Sequelize: jest.fn(),
+  Sequelize: {
+    Model: class Model {
+      static init() {}
+      static findAll() {}
+      static findByPk() {}
+      static create() {}
+      static update() {}
+      static destroy() {}
+      static belongsTo() {}
+      static hasMany() {}
+      static belongsToMany() {}
+    },
+    DataTypes: {
+      INTEGER: 'INTEGER',
+      STRING: 'STRING',
+      DECIMAL: () => 'DECIMAL',
+      DATE: 'DATE',
+      BOOLEAN: 'BOOLEAN',
+      TEXT: 'TEXT',
+      FLOAT: 'FLOAT',
+    },
+    QueryTypes: { SELECT: 'SELECT' },
+    NOW: 'NOW',
+  },
 }));
 
 jest.mock('../config/nosql', () => ({
@@ -15,27 +41,55 @@ jest.mock('../config/nosql', () => ({
 
 jest.mock('../models/usuariosModel', () => ({
   buscarPorCorreo: jest.fn(),
+  sequelizeModel: class FakeModel {
+    static init() {} static belongsTo() {} static hasMany() {}
+  },
+}));
+jest.mock('../models/inventarioModel', () => ({
+  models: {
+    Producto:   class M { static init(){} static belongsTo(){} static hasMany(){} },
+    Categoria:  class M { static init(){} static belongsTo(){} static hasMany(){} },
+    Inventario: class M { static init(){} static belongsTo(){} static hasMany(){} },
+    Receta:     class M { static init(){} static belongsTo(){} static hasMany(){} },
+  },
+  obtenerBebidas: jest.fn(), actualizarStock: jest.fn(),
+  crearProducto: jest.fn(), obtenerInsumos: jest.fn(),
+  crearNuevoInsumo: jest.fn(), crearProductoConReceta: jest.fn(),
+  obtenerReceta: jest.fn(), actualizarReceta: jest.fn(),
+}));
+jest.mock('../models/clientesModel', () => ({
+  sequelizeModel: class M { static init(){} static belongsTo(){} static hasMany(){} },
+  buscarOCrearCliente: jest.fn(), obtenerTodos: jest.fn(),
+}));
+jest.mock('../models/pedidosModel', () => ({
+  models: {},
+  crearPedido: jest.fn(), obtenerPedidosPendientes: jest.fn(),
+  obtenerPedidosCompletados: jest.fn(), obtenerDetallePedido: jest.fn(),
+  completarPedido: jest.fn(), obtenerTiposLeche: jest.fn(),
+  crearPedidoPersonalizado: jest.fn(),
 }));
 
-jest.mock('bcrypt', () => ({
-  compare: jest.fn(),
-}));
+jest.mock('bcrypt', () => ({ compare: jest.fn() }));
 
-const bcrypt            = require('bcrypt');
-const usuariosModel     = require('../models/usuariosModel');
+const cors = require('cors');
+const path = require('path');
+const ErrorHandler = require('../middleware/errorHandler');
+
+function buildApp() {
+  const app = express();
+  app.use(express.json());
+  app.use(cors());
+  app.use('/api/auth', require('../routes/auth'));
+  app.use(ErrorHandler.handle);
+  return app;
+}
+
+const bcrypt        = require('bcrypt');
+const usuariosModel = require('../models/usuariosModel');
 
 let app;
 beforeAll(() => {
-
-  jest.isolateModules(() => {
-    const express = require('express');
-    const original = express.application.listen;
-    express.application.listen = jest.fn().mockReturnValue({ close: jest.fn() });
-
-    app = require('../server');
-
-    express.application.listen = original;
-  });
+  app = buildApp();
 });
 
 const USUARIO_MOCK = {
@@ -43,14 +97,12 @@ const USUARIO_MOCK = {
   Nombre: 'Juan Pérez',
   Rol: 'admin',
   Correo: 'juan@coffeetrack.com',
-  Contrasena: '$2b$10$hashedpassword',   // hash ficticio
+  Contrasena: '$2b$10$hashedpassword',
 };
 
 describe('POST /api/auth/login', () => {
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  beforeEach(() => jest.clearAllMocks());
 
   test('credenciales válidas → 200 con datos del usuario', async () => {
     usuariosModel.buscarPorCorreo.mockResolvedValue(USUARIO_MOCK);
@@ -96,7 +148,7 @@ describe('POST /api/auth/login', () => {
     expect(res.body.message).toBe('Credenciales inválidas');
   });
 
-  test('body vacío → 401 (usuario no encontrado)', async () => {
+  test('body vacío → 401', async () => {
     usuariosModel.buscarPorCorreo.mockResolvedValue(null);
 
     const res = await request(app)
@@ -119,7 +171,7 @@ describe('POST /api/auth/login', () => {
     expect(res.body.success).toBe(false);
   });
 
-  test('error de DB → 500 con mensaje de error', async () => {
+  test('error de DB → 500', async () => {
     usuariosModel.buscarPorCorreo.mockRejectedValue(new Error('DB connection failed'));
 
     const res = await request(app)
