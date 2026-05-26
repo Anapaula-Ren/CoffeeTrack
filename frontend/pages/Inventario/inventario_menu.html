@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario - CoffeeTrack</title>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/inventario.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── Panel de menú: estilos exclusivos ─────────────────── */
+
+    .inv-menu-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+
+    /* Cabecera */
+    .inv-menu-header {
+      margin-bottom: 32px;
+    }
+
+    .inv-menu-header-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .inv-menu-title {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #3e2723;
+      margin: 0;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .inv-menu-title i { color: #8d6e63; font-size: 1.5rem; }
+
+    .inv-menu-badge {
+      background: #f5eeea;
+      color: #6d4c41;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 5px 13px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border: 1px solid #e3d8d0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .inv-menu-subtitle {
+      font-size: 0.9rem;
+      color: #a1887f;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Separador de sección */
+    .inv-section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #bcaaa4;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 14px;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .inv-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #efe8e4;
+    }
+
+    /* ── Grid de categorías ─────────────────────────────────── */
+    .inv-cat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    @media (max-width: 580px) {
+      .inv-cat-grid       { grid-template-columns: 1fr; }
+      .inv-menu-title     { font-size: 1.5rem; }
+      .inv-menu-wrapper   { padding: 20px 16px 36px; }
+    }
+
+    /* Tarjeta */
+    .inv-cat-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 22px;
+      border-radius: 16px;
+      text-decoration: none;
+      background: #fff;
+      border: 1.5px solid #ede5e0;
+      box-shadow: 0 1px 6px rgba(93, 64, 55, 0.04);
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .inv-cat-card:hover {
+      transform: translateY(-3px);
+      border-color: #c7bdae;
+      box-shadow: 0 8px 22px rgba(93, 64, 55, 0.10);
+      background: #fdfcfb;
+    }
+
+    /* Ícono café uniforme */
+    .inv-cat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: #f5eeea;
+      color: #6d4c41;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+      transition: background 0.22s, color 0.22s, transform 0.22s;
+    }
+
+    .inv-cat-card:hover .inv-cat-icon {
+      background: #6d4c41;
+      color: #fff;
+      transform: scale(1.07);
+    }
+
+    /* Texto */
+    .inv-cat-body { flex: 1; min-width: 0; }
+
+    .inv-cat-body h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #3e2723;
+      margin: 0 0 3px;
+    }
+
+    .inv-cat-body p {
+      font-size: 0.79rem;
+      color: #a1887f;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Flecha */
+    .inv-cat-arrow {
+      color: #d7ccc8;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      transition: color 0.22s, transform 0.22s;
+    }
+
+    .inv-cat-card:hover .inv-cat-arrow {
+      color: #8d6e63;
+      transform: translateX(3px);
+    }
+
+    /* ── Barra de reporte (ligera, acorde al diseño original) ── */
+    .inv-report-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      background: #fdfaf7;
+      border: 1.5px solid #ede5e0;
+      border-radius: 16px;
+      padding: 20px 26px;
+    }
+
+    @media (max-width: 580px) {
+      .inv-report-bar {
+        flex-direction: column;
+        text-align: center;
+        gap: 14px;
+        padding: 18px;
+      }
+    }
+
+    .inv-report-info { flex: 1; }
+
+    .inv-report-info h3 {
+      font-size: 0.97rem;
+      font-weight: 700;
+      color: #3e2723;
+      margin: 0 0 3px;
+    }
+
+    .inv-report-info p {
+      font-size: 0.8rem;
+      color: #a1887f;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .inv-report-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #5d4037;
+      color: #fff;
+      border: none;
+      padding: 11px 22px;
+      border-radius: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 3px 10px rgba(93, 64, 55, 0.2);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .inv-report-btn:hover {
+      background: #3e2723;
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(93, 64, 55, 0.28);
+    }
+
+    /* Animaciones suaves de entrada */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .inv-menu-header            { animation: fadeUp 0.3s ease both; }
+    .inv-cat-card:nth-child(1)  { animation: fadeUp 0.3s 0.06s ease both; }
+    .inv-cat-card:nth-child(2)  { animation: fadeUp 0.3s 0.10s ease both; }
+    .inv-cat-card:nth-child(3)  { animation: fadeUp 0.3s 0.14s ease both; }
+    .inv-cat-card:nth-child(4)  { animation: fadeUp 0.3s 0.18s ease both; }
+    .inv-report-bar             { animation: fadeUp 0.3s 0.24s ease both; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1><i class="fa-solid fa-mug-saucer" style="color: #ffffff;"></i> CoffeeTrack</h1>
+    <nav>
+      <a href="../inicio/Inicio.html">Inicio</a>
+      <a href="../pedidos/GestionPedidos.html">Pedidos</a>
+      <a href="#" class="activo">Inventario</a>
+      <a href="../pedidos/Panel.html">Panel</a>
+      <a href="../usuarios/Usuarios.html" id="linkUsuarios" style="display:none;">Usuarios</a>
+      <a href="../../InicioDeSesion.html" id="btnCerrarSesion">Cerrar sesión</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="inv-menu-wrapper">
+
+      <!-- Cabecera -->
+      <div class="inv-menu-header">
+        <div class="inv-menu-header-top">
+          <h2 class="inv-menu-title">
+            <i class="fa-solid fa-boxes-packing"></i> Inventario
+          </h2>
+          <span class="inv-menu-badge">Control de Stock</span>
+        </div>
+        <p class="inv-menu-subtitle">Administración y auditoría de insumos operativos.</p>
+      </div>
+
+      <!-- Categorías -->
+      <p class="inv-section-label">Categorías</p>
+      <section class="inv-cat-grid">
+
+        <a href="inventario_bebidas.html" class="inv-cat-card cat-bebidas">
+          <div class="inv-cat-icon"><i class="fa-solid fa-mug-hot"></i></div>
+          <div class="inv-cat-body">
+            <h3>Bebidas</h3>
+            <p>Café, tés, jarabes, leches y polvos.</p>
+          </div>
+          <div class="inv-cat-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+
+        <a href="inventario_comidas.html" class="inv-cat-card cat-comidas">
+          <div class="inv-cat-icon"><i class="fa-solid fa-cookie-bite"></i></div>
+          <div class="inv-cat-body">
+            <h3>Comidas</h3>
+            <p>Panadería, postres, snacks e ingredientes.</p>
+          </div>
+          <div class="inv-cat-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+
+        <a href="inventario_envases.html" class="inv-cat-card cat-envases">
+          <div class="inv-cat-icon"><i class="fa-solid fa-box-open"></i></div>
+          <div class="inv-cat-body">
+            <h3>Envases y Empaques</h3>
+            <p>Vasos, tapas, servilletas y bolsas.</p>
+          </div>
+          <div class="inv-cat-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+
+        <a href="inventario_limpieza.html" class="inv-cat-card cat-limpieza">
+          <div class="inv-cat-icon"><i class="fa-solid fa-pump-soap"></i></div>
+          <div class="inv-cat-body">
+            <h3>Limpieza</h3>
+            <p>Detergentes, desinfectantes y utensilios.</p>
+          </div>
+          <div class="inv-cat-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+
+      </section>
+
+      <!-- Barra de reporte -->
+      <p class="inv-section-label">Auditoría</p>
+      <div class="inv-report-bar">
+        <div class="inv-report-info">
+          <h3>Reporte de Inventario</h3>
+          <p>Genera un reporte del nivel de stock actual de todos los artículos.</p>
+        </div>
+        <button id="btnReporteInventario" class="inv-report-btn">
+          <i class="fa-solid fa-file-invoice"></i> Generar Reporte
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Modal Reporte Inventario -->
+  <div id="modalReporteInventario" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span id="closeReporteInventario" class="close-btn">&times;</span>
+      <h2><i class="fas fa-boxes"></i> Reporte de Inventario</h2>
+      <div id="tablaReporteInventario">
+        <p>Cargando reporte de inventario...</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 CoffeeTrack. Todos los derechos reservados.</p>
+    <nav>
+      <a href="../legal/politica_privacidad.html">Política de privacidad</a> |
+      <a href="../legal/condiciones_servicio.html">Condiciones de servicio</a> |
+      <a href="../legal/preguntas_frecuentes.html">Preguntas frecuentes</a>
+    </nav>
+  </footer>
+
+  <script src="../../assets/js/inventario.js"></script>
+
+</body>
+</html>

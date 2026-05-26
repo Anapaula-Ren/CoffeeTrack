@@ -1,0 +1,339 @@
+/* ==========================================================================
+   ESTILOS DE INICIO DE SESIÓN - COFFEETRACK (DISEÑO BOUTIQUE PREMIUM DE PANTALLA COMPLETA)
+   ========================================================================== */
+
+/* Ajustar el body a 100vh exactos y deshabilitar scroll vertical */
+body {
+  height: 100vh !important;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #fdfcfb 0%, #f4ece6 100%) !important;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden !important; /* Deshabilitar scroll en toda la ventana */
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* NAVBAR HEADER */
+header {
+  background-color: #5d4037 !important;
+  box-shadow: 0 3px 12px rgba(93, 64, 55, 0.08) !important;
+  padding: 12px 40px !important; /* Más compacto verticalmente */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0; /* Evita que el header se encoja */
+}
+
+header h1 {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.4px;
+}
+
+/* MAIN CONTENT (CENTRADO PERFECTO Y COMPACTO) */
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1; /* Ocupa el espacio restante exacto */
+  padding: 10px 20px;
+  box-sizing: border-box;
+  overflow: hidden; /* Evita desbordamiento en main */
+}
+
+/* BIENVENIDA CON DISEÑO EDITORIAL SUPER COMPACTO */
+.welcome {
+  margin-bottom: 18px; /* Reducido para ahorrar espacio */
+  text-align: center;
+}
+
+.welcome h1 {
+  color: #3e2723;
+  font-size: 1.75rem; /* Escalado a un tamaño más compacto */
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.6px;
+}
+
+/* Divisor editorial humano y elegante */
+.welcome::after {
+  content: '';
+  display: block;
+  width: 35px;
+  height: 2px;
+  background-color: #8d6e63;
+  margin: 8px auto 8px; /* Espaciado muy compacto */
+  border-radius: 2px;
+}
+
+.welcome p {
+  max-width: 480px;
+  margin: 0 auto;
+  color: #6d4c41;
+  line-height: 1.5;
+  font-size: 0.88rem; /* Tipografía más compacta */
+  font-weight: 400;
+}
+
+/* TARJETA DE LOGIN (DISEÑO PREMIUM Y MÁS DOCKADO) */
+.login-box {
+  background: #ffffff;
+  width: 100%;
+  max-width: 380px; /* Ancho optimizado */
+  padding: 22px 28px 25px; /* Relleno compacto para evitar scroll */
+  box-shadow: 
+    0 12px 30px rgba(93, 64, 55, 0.05), 
+    0 4px 10px rgba(0, 0, 0, 0.01);
+  border-radius: 14px;
+  text-align: left;
+  border: 1.5px solid #eae1db;
+  border-top: 4px solid #5d4037; /* Detalle de color superior */
+  box-sizing: border-box;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  margin: 0; /* Centrado automático dentro de main */
+}
+
+.login-box:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 
+    0 15px 35px rgba(93, 64, 55, 0.08), 
+    0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.login-box h2 {
+  color: #3e2723;
+  margin: 0 0 16px 0;
+  text-align: center;
+  font-size: 1.25rem; /* Más compacto */
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+/* ETIQUETAS E INPUTS ESTILIZADOS COMPACTOS */
+.login-box label {
+  display: block;
+  font-size: 0.72rem; /* Más compacto */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #8d6e63;
+  margin-bottom: 5px;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 10px 12px; /* Relleno optimizado */
+  margin-bottom: 12px; /* Margen inferior reducido a la mitad */
+  border: 1.5px solid #d7ccc8;
+  background-color: #faf6f4;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #3e2723;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.login-box input::placeholder {
+  color: #bcaaa4;
+}
+
+.login-box input:focus {
+  outline: none;
+  border-color: #5d4037;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(93, 64, 55, 0.05);
+}
+
+/* PASSWORD CONTAINER & TOGGLE COMPACTO */
+.password-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-container input {
+  padding-right: 38px;
+  margin-bottom: 12px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 11px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #8d6e63;
+  user-select: none;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password:hover {
+  color: #5d4037;
+}
+
+/* BOTÓN DE ENTRADA BOUTIQUE COMPACTO */
+.login-box button {
+  width: 100%;
+  padding: 11px; /* Relleno optimizado */
+  background-color: #5d4037;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(93, 64, 55, 0.1);
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+  margin-top: 3px;
+}
+
+.login-box button:hover {
+  background-color: #4e342e;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(93, 64, 55, 0.16);
+}
+
+.login-box button:active {
+  transform: translateY(0);
+}
+
+/* FOOTER COMPACTO ALINEADO AL FINAL */
+footer {
+  background-color: #3e2723 !important;
+  color: #eae1db !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 40px; /* Relleno súper compacto */
+  position: relative;
+  margin-top: auto;
+  box-sizing: border-box;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0; /* Evita que el footer se encoja */
+}
+
+footer h3 {
+  color: #ffcc80 !important;
+  font-size: 0.88rem; /* Más compacto */
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.2px;
+}
+
+footer p {
+  font-size: 0.78rem; /* Tipografía compacta */
+  color: #d7ccc8;
+  margin: 0;
+}
+
+footer a {
+  color: #ffcc80 !important;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+footer a:hover {
+  color: #ffe0b2 !important;
+  text-decoration: underline;
+}
+
+.contacto {
+  text-align: left;
+}
+
+.contacto p {
+  margin-bottom: 4px !important;
+}
+
+.social {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.social .icons {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.social .icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; /* Iconos más compactos */
+  height: 30px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.social .icons a img {
+  width: 14px;
+  height: 14px;
+  filter: brightness(1.2);
+}
+
+.social .icons a:hover {
+  background: #ffcc80;
+  transform: translateY(-2px);
+  border-color: #ffcc80;
+  box-shadow: 0 3px 8px rgba(255, 204, 128, 0.15);
+}
+
+.social .icons a:hover img {
+  filter: brightness(0.2) contrast(1.5);
+}
+
+/* ANIMACIONES */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  body {
+    height: auto !important; /* Permitir scroll en móviles muy pequeños si es necesario */
+    overflow: auto !important;
+  }
+
+  main {
+    margin-top: 15px;
+    padding-bottom: 20px;
+  }
+
+  .welcome h1 {
+    font-size: 1.5rem;
+  }
+
+  .welcome p {
+    font-size: 0.85rem;
+  }
+
+  .login-box {
+    width: 95%;
+    padding: 20px 20px 22px;
+  }
+
+  footer {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    padding: 15px 20px;
+  }
+
+  .contacto, .social {
+    text-align: center;
+    align-items: center;
+  }
+}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Pedidos - CoffeeTrack</title>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pedidos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <header>
+    <h1><i class="fa-solid fa-mug-saucer" style="color: #ffffff;"></i> CoffeeTrack</h1>
+    <nav>
+      <a href="../inicio/Inicio.html">Inicio</a>
+      <a href="GestionPedidos.html">Pedidos</a>
+      <a href="../Inventario/inventario_menu.html">Inventario</a>
+      <a href="#" class="activo">Panel</a>
+      <a href="../usuarios/Usuarios.html" id="linkUsuarios" style="display:none;">Usuarios</a>
+      <a href="../../InicioDeSesion.html" id="btnCerrarSesion">Cerrar sesión</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Panel de Órdenes</h2>
+
+    <div class="panel-layout">
+
+      <section class="order-list-container">
+        <h3>Lista de Pedidos Recientes</h3>
+        <div class="order-row order-header-row">
+          <div>ID</div>
+          <div>Cliente / Mesa</div>
+          <div>Fecha y Hora</div>
+          <div>Total</div>
+          <div>Estado</div>
+        </div>
+        <div id="orderList">
+          <p>Cargando pedidos...</p>
+        </div>
+      </section>
+
+      <section class="order-detail-container">
+        <h3 id="detailTitle">Detalle del Pedido</h3>
+        <div id="orderDetailContent">
+          <p>Selecciona un pedido de la lista para ver los detalles.</p>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="reportes-container">
+      <button id="btnReportes" class="btn-reportes btn-reportes-secondary" style="display:none;">
+        <i class="fa-solid fa-chart-line"></i> Generar Reporte de ventas
+      </button>
+      <button id="btnTopProductos" class="btn-reportes btn-reportes-primary">
+        <i class="fa-solid fa-trophy" style="color: #ffb300;"></i> Top 5 Productos más vendidos
+      </button>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>© 2025 CoffeeTrack. Todos los derechos reservados.</p>
+      <nav class="footer-links">
+        <a href="../legal/politica_privacidad.html">Política de privacidad</a> |
+        <a href="../legal/condiciones_servicio.html">Condiciones de servicio</a> |
+        <a href="../legal/preguntas_frecuentes.html">Preguntas frecuentes</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- Modal Reporte de Ventas -->
+  <div id="modalReportes" class="modal" style="display:none;">
+    <div class="modal-content reportes-modal-width">
+      <div class="modal-header-band">
+        <h3 class="modal-title"><i class="fa-solid fa-chart-line"></i> Reporte de Ventas</h3>
+        <button id="closeReportes" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body-pad">
+        <div id="tablaReporte"><p>Cargando reporte...</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Top 5 Productos -->
+  <div id="modalTopProductos" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header-band">
+        <h3 class="modal-title"><i class="fa-solid fa-trophy" style="color: #ffb300;"></i> Top 5 Productos Más Vendidos</h3>
+        <button id="closeTopProductos" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body-pad">
+        <div class="top-date-filters">
+          <div class="filter-item">
+            <label>Desde:</label>
+            <input type="date" id="fechaInicio">
+          </div>
+          <div class="filter-item">
+            <label>Hasta:</label>
+            <input type="date" id="fechaFin">
+          </div>
+          <button onclick="cargarTopProductos()" class="btn-consultar">
+            <i class="fa-solid fa-magnifying-glass"></i> Consultar
+          </button>
+        </div>
+
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th style="text-align: center;">Unidades</th>
+              <th style="text-align: right;">Ingresos</th>
+            </tr>
+          </thead>
+          <tbody id="tablaTopProductos">
+            <tr><td colspan="3" style="text-align: center; padding: 20px;">Selecciona fechas.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Email -->
+  <div id="modalEmail" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width: 500px;">
+      <span id="closeEmail" class="close-btn">&times;</span>
+      <h3 style="color: #5a3d31; margin-bottom: 20px;">
+        <i class="fas fa-envelope"></i> Enviar Ticket por Email
+      </h3>
+      <div id="emailModalContent">
+        <p id="emailMessage">Cargando...</p>
+        <div id="emailForm" style="display: none;">
+          <div style="margin-bottom: 15px;">
+            <label for="inputEmail" style="display: block; margin-bottom: 5px; font-weight: bold;">
+              Correo electrónico:
+            </label>
+            <input type="email" id="inputEmail" placeholder="ejemplo@correo.com"
+              style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button id="btnCancelarEmail" class="btn-reportes" style="background-color: #7f8c8d;">Cancelar</button>
+            <button id="btnEnviarTicket" class="btn-reportes">
+              <i class="fas fa-paper-plane"></i> Enviar Ticket
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/js/panel.js"></script>
+</body>
+</html>
