@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,9 @@
   <link rel="stylesheet" href="../../assets/css/usuarios.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="../../assets/js/customAlerts.js"></script>
 </head>
+
 <body>
 
   <header>
@@ -57,7 +60,7 @@
     <div class="modal-content user-modal-width">
       <div class="modal-header-band">
         <h3 class="modal-title">
-          <i class="fa-solid fa-user-plus" id="modalTitleIcon"></i> 
+          <i class="fa-solid fa-user-plus" id="modalTitleIcon"></i>
           <span id="modalTitle">Nuevo Usuario</span>
         </h3>
         <button type="button" class="modal-close-btn" onclick="closeModal()">&times;</button>
@@ -79,8 +82,10 @@
           <div class="form-group">
             <label for="contrasena">Contraseña:</label>
             <div style="position: relative; width: 100%; display: flex; align-items: center;">
-              <input type="password" id="contrasena" placeholder="Dejar en blanco si no cambia" style="padding-right: 40px; width: 100%;">
-              <button type="button" id="btnToggleContrasena" style="position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #8d6e63; padding: 0; display: flex; align-items: center; justify-content: center; outline: none; box-shadow: none; transition: color 0.2s;">
+              <input type="password" id="contrasena" placeholder="Dejar en blanco si no cambia"
+                style="padding-right: 40px; width: 100%;">
+              <button type="button" id="btnToggleContrasena"
+                style="position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #8d6e63; padding: 0; display: flex; align-items: center; justify-content: center; outline: none; box-shadow: none; transition: color 0.2s;">
                 <i class="fa-solid fa-eye" id="iconoOjo" style="font-size: 1.15rem;"></i>
               </button>
             </div>
@@ -117,16 +122,17 @@
 
   <script>
     const API_URL = 'http://localhost:3000';
-    const modal     = document.getElementById('userModal');
-    const form      = document.getElementById('userForm');
+    const modal = document.getElementById('userModal');
+    const form = document.getElementById('userForm');
     const usersList = document.getElementById('usersList');
 
     // ==================== VERIFICAR ACCESO ====================
     document.addEventListener('DOMContentLoaded', () => {
       const rol = localStorage.getItem('usuarioRol');
       if (rol !== 'Administrador') {
-        alert('Acceso denegado. Solo administradores.');
-        window.location.href = '../inicio/Inicio.html';
+        alert('Acceso denegado. Solo administradores.', () => {
+          window.location.href = '../inicio/Inicio.html';
+        });
         return;
       }
       loadUsers();
@@ -143,7 +149,7 @@
         btnToggle.addEventListener('click', () => {
           const type = inputPass.getAttribute('type') === 'password' ? 'text' : 'password';
           inputPass.setAttribute('type', type);
-          
+
           if (type === 'password') {
             iconoOjo.className = 'fa-solid fa-eye';
             btnToggle.style.color = '#8d6e63';
@@ -158,7 +164,7 @@
     // ==================== CARGAR USUARIOS ====================
     async function loadUsers() {
       try {
-        const res   = await fetch(`${API_URL}/api/usuarios`);
+        const res = await fetch(`${API_URL}/api/usuarios`);
         const users = await res.json();
 
         usersList.innerHTML = '';
@@ -211,10 +217,10 @@
       if (user) {
         document.getElementById('modalTitle').textContent = 'Editar Usuario';
         if (icon) icon.className = 'fa-solid fa-user-pen';
-        document.getElementById('userId').value          = user.IdUsuario;
-        document.getElementById('nombre').value          = user.Nombre;
-        document.getElementById('correo').value          = user.Correo;
-        document.getElementById('rol').value             = user.Rol;
+        document.getElementById('userId').value = user.IdUsuario;
+        document.getElementById('nombre').value = user.Nombre;
+        document.getElementById('correo').value = user.Correo;
+        document.getElementById('rol').value = user.Rol;
         document.getElementById('contrasena').removeAttribute('required');
         document.getElementById('contrasena').placeholder = 'Dejar en blanco para mantener actual';
       } else {
@@ -237,7 +243,8 @@
 
     // ==================== ELIMINAR USUARIO ====================
     async function deleteUser(id) {
-      if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+      const accepted = await confirm('¿Estás seguro de eliminar este usuario?');
+      if (!accepted) return;
 
       try {
         const res = await fetch(`${API_URL}/api/usuarios/${id}`, { method: 'DELETE' });
@@ -256,23 +263,23 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const id        = document.getElementById('userId').value;
-      const nombre    = document.getElementById('nombre').value;
-      const correo    = document.getElementById('correo').value;
+      const id = document.getElementById('userId').value;
+      const nombre = document.getElementById('nombre').value;
+      const correo = document.getElementById('correo').value;
       const contrasena = document.getElementById('contrasena').value;
-      const rol       = document.getElementById('rol').value;
+      const rol = document.getElementById('rol').value;
 
       const data = { nombre, correo, rol };
       if (contrasena) data.contrasena = contrasena;
 
       try {
-        const url    = id ? `${API_URL}/api/usuarios/${id}` : `${API_URL}/api/usuarios`;
+        const url = id ? `${API_URL}/api/usuarios/${id}` : `${API_URL}/api/usuarios`;
         const method = id ? 'PUT' : 'POST';
 
-        const res    = await fetch(url, {
+        const res = await fetch(url, {
           method,
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(data)
+          body: JSON.stringify(data)
         });
 
         const result = await res.json();
@@ -292,10 +299,11 @@
     });
 
     // ==================== CERRAR MODAL AL HACER CLIC FUERA ====================
-    window.onclick = function(event) {
+    window.onclick = function (event) {
       if (event.target === modal) closeModal();
     };
   </script>
 
 </body>
+
 </html>

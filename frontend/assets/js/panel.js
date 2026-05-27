@@ -4,13 +4,13 @@ const userRole = localStorage.getItem('usuarioRol');
 
 if (userRole === 'Encargado de inventario') {
   const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
-  const panelLink   = document.querySelector('nav a[href*="Panel.html"]');
+  const panelLink = document.querySelector('nav a[href*="Panel.html"]');
   if (pedidosLink) pedidosLink.style.display = 'none';
-  if (panelLink)   panelLink.style.display   = 'none';
+  if (panelLink) panelLink.style.display = 'none';
 }
 
 document.getElementById('btnCerrarSesion')
-  ?.addEventListener('click', function(e) {
+  ?.addEventListener('click', function (e) {
     e.preventDefault();
     localStorage.clear();
     window.location.href = '../../InicioDeSesion.html';
@@ -40,7 +40,7 @@ const formatDate = (dateString) => {
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-const orderListDiv       = document.getElementById('orderList');
+const orderListDiv = document.getElementById('orderList');
 const orderDetailContent = document.getElementById('orderDetailContent');
 
 async function loadOrderList() {
@@ -52,10 +52,10 @@ async function loadOrderList() {
     orderListDiv.innerHTML = '';
 
     orders.forEach(order => {
-      const row      = document.createElement('div');
-      row.className  = 'order-row';
+      const row = document.createElement('div');
+      row.className = 'order-row';
       row.dataset.id = order.IdPedido;
-      row.innerHTML  = `
+      row.innerHTML = `
         <div>#${order.IdPedido}</div>
         <div>${order.NombreCliente}</div>
         <div>${formatDate(order.Fecha)}</div>
@@ -146,9 +146,11 @@ async function showOrderDetail(orderId, orderSummary) {
 
     document.getElementById('completeOrderBtn')
       ?.addEventListener('click', () => {
-        if (confirm(`¿Marcar el Pedido #${orderId} como COMPLETADO?`)) {
-          markOrderAsCompleted(orderId, activeRow);
-        }
+        confirm(`¿Marcar el Pedido #${orderId} como COMPLETADO?`).then((accepted) => {
+          if (accepted) {
+            markOrderAsCompleted(orderId, activeRow);
+          }
+        });
       });
 
     document.getElementById('sendTicketBtn')
@@ -162,7 +164,7 @@ async function showOrderDetail(orderId, orderSummary) {
 async function markOrderAsCompleted(orderId, rowElement) {
   try {
     const response = await fetch(`${API_URL}/api/pedidos/${orderId}/completar`, {
-      method:  'PUT',
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' }
     });
 
@@ -178,17 +180,17 @@ async function markOrderAsCompleted(orderId, rowElement) {
 }
 
 async function prepareTicketEmail(orderId, orderSummary, details) {
-  const modalEmail   = document.getElementById('modalEmail');
+  const modalEmail = document.getElementById('modalEmail');
   const emailMessage = document.getElementById('emailMessage');
-  const emailForm    = document.getElementById('emailForm');
-  const inputEmail   = document.getElementById('inputEmail');
+  const emailForm = document.getElementById('emailForm');
+  const inputEmail = document.getElementById('inputEmail');
 
   modalEmail.style.display = 'flex';
-  emailForm.style.display  = 'none';
+  emailForm.style.display = 'none';
   emailMessage.textContent = 'Verificando información del cliente...';
 
   try {
-    const response    = await fetch(`${API_URL}/api/pedidos/${orderId}/cliente`);
+    const response = await fetch(`${API_URL}/api/pedidos/${orderId}/cliente`);
     const clienteData = await response.json();
 
     if (clienteData.email) {
@@ -201,8 +203,8 @@ async function prepareTicketEmail(orderId, orderSummary, details) {
           <p style="margin:10px 0 0 0; font-size:0.9em;">Cliente: ${clienteData.nombre}</p>
         </div>
       `;
-      emailForm.style.display  = 'block';
-      inputEmail.value         = clienteData.email;
+      emailForm.style.display = 'block';
+      inputEmail.value = clienteData.email;
       inputEmail.style.display = 'none';
       document.getElementById('btnEnviarTicket').onclick =
         () => sendTicketEmail(orderId, clienteData.email, orderSummary, details);
@@ -219,9 +221,9 @@ async function prepareTicketEmail(orderId, orderSummary, details) {
           </p>
         </div>
       `;
-      emailForm.style.display  = 'block';
+      emailForm.style.display = 'block';
       inputEmail.style.display = 'block';
-      inputEmail.value         = '';
+      inputEmail.value = '';
       inputEmail.focus();
       document.getElementById('btnEnviarTicket').onclick = () => {
         const email = inputEmail.value.trim();
@@ -246,17 +248,17 @@ async function prepareTicketEmail(orderId, orderSummary, details) {
 }
 
 async function sendTicketEmail(orderId, email, orderSummary, details) {
-  const btnEnviar    = document.getElementById('btnEnviarTicket');
+  const btnEnviar = document.getElementById('btnEnviarTicket');
   const originalText = btnEnviar.innerHTML;
 
   try {
     btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-    btnEnviar.disabled  = true;
+    btnEnviar.disabled = true;
 
     const response = await fetch(`${API_URL}/api/pedidos/enviar-ticket`, {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ orderId, email, orderSummary, details })
+      body: JSON.stringify({ orderId, email, orderSummary, details })
     });
 
     const result = await response.json();
@@ -272,7 +274,7 @@ async function sendTicketEmail(orderId, email, orderSummary, details) {
     alert('❌ Error al enviar el ticket: ' + error.message);
   } finally {
     btnEnviar.innerHTML = originalText;
-    btnEnviar.disabled  = false;
+    btnEnviar.disabled = false;
   }
 }
 
@@ -284,10 +286,10 @@ async function loadReport() {
   const tabla = document.getElementById('tablaReporte');
 
   modal.style.display = 'flex';
-  tabla.innerHTML     = '<p>Cargando...</p>';
+  tabla.innerHTML = '<p>Cargando...</p>';
 
   try {
-    const res     = await fetch(`${API_URL}/api/pedidos/completados`);
+    const res = await fetch(`${API_URL}/api/pedidos/completados`);
     const pedidos = await res.json();
 
     let totalGeneral = 0;
@@ -331,18 +333,18 @@ async function loadReport() {
 
 function setupTopProductos() {
   const modalTop = document.getElementById('modalTopProductos');
-  const btnTop   = document.getElementById('btnTopProductos');
+  const btnTop = document.getElementById('btnTopProductos');
   const closeTop = document.getElementById('closeTopProductos');
 
   if (btnTop) {
     btnTop.addEventListener('click', () => {
       modalTop.style.display = 'flex';
 
-      const hoy  = new Date();
+      const hoy = new Date();
       const ayer = new Date();
       ayer.setDate(hoy.getDate() - 1);
 
-      document.getElementById('fechaFin').value    = hoy.toISOString().split('T')[0];
+      document.getElementById('fechaFin').value = hoy.toISOString().split('T')[0];
       document.getElementById('fechaInicio').value = ayer.toISOString().split('T')[0];
 
       cargarTopProductos();
@@ -356,8 +358,8 @@ function setupTopProductos() {
 
 async function cargarTopProductos() {
   const fInicio = document.getElementById('fechaInicio').value;
-  const fFin    = document.getElementById('fechaFin').value;
-  const tbody   = document.getElementById('tablaTopProductos');
+  const fFin = document.getElementById('fechaFin').value;
+  const tbody = document.getElementById('tablaTopProductos');
 
   if (!fInicio || !fFin) {
     alert('Selecciona ambas fechas.');
@@ -368,9 +370,9 @@ async function cargarTopProductos() {
 
   try {
     const response = await fetch(`${API_URL}/api/reportes/top`, {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ inicio: fInicio, fin: fFin })
+      body: JSON.stringify({ inicio: fInicio, fin: fFin })
     });
 
     const lista = await response.json();

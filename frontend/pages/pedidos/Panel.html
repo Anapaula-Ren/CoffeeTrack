@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,8 +10,10 @@
   <link rel="stylesheet" href="../../assets/css/pedidos.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="../../assets/js/customAlerts.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
   <header>
@@ -82,7 +85,9 @@
         <button id="closeReportes" class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body-pad">
-        <div id="tablaReporte"><p>Cargando reporte...</p></div>
+        <div id="tablaReporte">
+          <p>Cargando reporte...</p>
+        </div>
       </div>
     </div>
   </div>
@@ -91,7 +96,8 @@
   <div id="modalTopProductos" class="modal" style="display:none;">
     <div class="modal-content" style="max-width: 700px;">
       <div class="modal-header-band">
-        <h3 class="modal-title"><i class="fa-solid fa-trophy" style="color: #ffb300;"></i> Top 5 Productos Más Vendidos</h3>
+        <h3 class="modal-title"><i class="fa-solid fa-trophy" style="color: #ffb300;"></i> Top 5 Productos Más Vendidos
+        </h3>
         <button id="closeTopProductos" class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body-pad">
@@ -118,7 +124,9 @@
             </tr>
           </thead>
           <tbody id="tablaTopProductos">
-            <tr><td colspan="3" style="text-align: center; padding: 20px;">Selecciona fechas.</td></tr>
+            <tr>
+              <td colspan="3" style="text-align: center; padding: 20px;">Selecciona fechas.</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -154,4 +162,5 @@
   </div>
   <script src="../../assets/js/panel.js"></script>
 </body>
+
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,7 +43,10 @@
       gap: 12px;
     }
 
-    .inv-menu-title i { color: #8d6e63; font-size: 1.5rem; }
+    .inv-menu-title i {
+      color: #8d6e63;
+      font-size: 1.5rem;
+    }
 
     .inv-menu-badge {
       background: #f5eeea;
@@ -77,6 +81,7 @@
       align-items: center;
       gap: 10px;
     }
+
     .inv-section-label::after {
       content: '';
       flex: 1;
@@ -93,9 +98,17 @@
     }
 
     @media (max-width: 580px) {
-      .inv-cat-grid       { grid-template-columns: 1fr; }
-      .inv-menu-title     { font-size: 1.5rem; }
-      .inv-menu-wrapper   { padding: 20px 16px 36px; }
+      .inv-cat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .inv-menu-title {
+        font-size: 1.5rem;
+      }
+
+      .inv-menu-wrapper {
+        padding: 20px 16px 36px;
+      }
     }
 
     /* Tarjeta */
@@ -141,7 +154,10 @@
     }
 
     /* Texto */
-    .inv-cat-body { flex: 1; min-width: 0; }
+    .inv-cat-body {
+      flex: 1;
+      min-width: 0;
+    }
 
     .inv-cat-body h3 {
       font-size: 1rem;
@@ -194,7 +210,9 @@
       }
     }
 
-    .inv-report-info { flex: 1; }
+    .inv-report-info {
+      flex: 1;
+    }
 
     .inv-report-info h3 {
       font-size: 0.97rem;
@@ -237,18 +255,44 @@
 
     /* Animaciones suaves de entrada */
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .inv-menu-header            { animation: fadeUp 0.3s ease both; }
-    .inv-cat-card:nth-child(1)  { animation: fadeUp 0.3s 0.06s ease both; }
-    .inv-cat-card:nth-child(2)  { animation: fadeUp 0.3s 0.10s ease both; }
-    .inv-cat-card:nth-child(3)  { animation: fadeUp 0.3s 0.14s ease both; }
-    .inv-cat-card:nth-child(4)  { animation: fadeUp 0.3s 0.18s ease both; }
-    .inv-report-bar             { animation: fadeUp 0.3s 0.24s ease both; }
+    .inv-menu-header {
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .inv-cat-card:nth-child(1) {
+      animation: fadeUp 0.3s 0.06s ease both;
+    }
+
+    .inv-cat-card:nth-child(2) {
+      animation: fadeUp 0.3s 0.10s ease both;
+    }
+
+    .inv-cat-card:nth-child(3) {
+      animation: fadeUp 0.3s 0.14s ease both;
+    }
+
+    .inv-cat-card:nth-child(4) {
+      animation: fadeUp 0.3s 0.18s ease both;
+    }
+
+    .inv-report-bar {
+      animation: fadeUp 0.3s 0.24s ease both;
+    }
   </style>
+  <script src="../../assets/js/customAlerts.js"></script>
 </head>
+
 <body>
 
   <header>
@@ -357,4 +401,5 @@
   <script src="../../assets/js/inventario.js"></script>
 
 </body>
+
 </html>
