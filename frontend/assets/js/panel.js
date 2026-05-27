@@ -162,11 +162,14 @@ async function showOrderDetail(orderId, orderSummary) {
 }
 
 async function markOrderAsCompleted(orderId, rowElement) {
+  showLoader('Completando pedido...');
   try {
     const response = await fetch(`${API_URL}/api/pedidos/${orderId}/completar`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' }
     });
+
+    hideLoader();
 
     if (!response.ok) throw new Error('Fallo la actualización en el servidor.');
 
@@ -175,6 +178,7 @@ async function markOrderAsCompleted(orderId, rowElement) {
     alert(`🎉 Pedido #${orderId} marcado como COMPLETADO.`);
 
   } catch (error) {
+    hideLoader();
     alert(`Error: No se pudo completar el pedido. ${error.message}`);
   }
 }
@@ -251,6 +255,7 @@ async function sendTicketEmail(orderId, email, orderSummary, details) {
   const btnEnviar = document.getElementById('btnEnviarTicket');
   const originalText = btnEnviar.innerHTML;
 
+  showLoader('Enviando ticket...');
   try {
     btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
     btnEnviar.disabled = true;
@@ -262,6 +267,7 @@ async function sendTicketEmail(orderId, email, orderSummary, details) {
     });
 
     const result = await response.json();
+    hideLoader();
 
     if (result.success) {
       alert('✅ Ticket enviado correctamente a: ' + email);
@@ -271,6 +277,7 @@ async function sendTicketEmail(orderId, email, orderSummary, details) {
     }
 
   } catch (error) {
+    hideLoader();
     alert('❌ Error al enviar el ticket: ' + error.message);
   } finally {
     btnEnviar.innerHTML = originalText;

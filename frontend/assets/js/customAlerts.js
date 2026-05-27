@@ -1,7 +1,7 @@
-(function() {
+(function () {
   // Global override for window.alert and window.confirm
-  
-  window.alert = function(message, callback) {
+
+  window.alert = function (message, callback) {
     return new Promise((resolve) => {
       // Remove any existing custom alert
       const existing = document.getElementById('coffee-custom-alert-container');
@@ -55,7 +55,7 @@
       // Determine clean icon/styling based on message content
       let iconHTML = '<i class="fa-solid fa-circle-info" style="color: #8d6e63; font-size: 1.3rem;"></i>';
       let titleText = 'Notificación';
-      
+
       if (message.includes('Error') || message.includes('denegado') || message.includes('incorrectos') || message.includes('No se pudo')) {
         iconHTML = '<i class="fa-solid fa-circle-xmark" style="color: #c62828; font-size: 1.3rem;"></i>';
         titleText = 'Error';
@@ -112,7 +112,7 @@
 
       const btn = document.getElementById('coffee-custom-alert-btn');
       btn.addEventListener('click', closeAlert);
-      
+
       // Keyboard enter key listener
       const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
@@ -125,7 +125,7 @@
     });
   };
 
-  window.confirm = function(message, callback) {
+  window.confirm = function (message, callback) {
     return new Promise((resolve) => {
       // Remove any existing custom confirm
       const existing = document.getElementById('coffee-custom-confirm-container');
@@ -266,7 +266,7 @@
     document.head.appendChild(style);
   }
 
-  window.showLoader = function(message = 'Cargando...') {
+  window.showLoader = function (message = 'Cargando...') {
     const existing = document.getElementById('coffee-custom-loader-container');
     if (existing) existing.remove();
 
@@ -317,7 +317,7 @@
     document.body.appendChild(container);
   };
 
-  window.hideLoader = function() {
+  window.hideLoader = function () {
     const container = document.getElementById('coffee-custom-loader-container');
     if (!container) return;
 

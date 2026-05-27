@@ -12,6 +12,8 @@ document.getElementById('loginForm')
       return;
     }
 
+    showLoader('Iniciando sesión...');
+
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
@@ -29,6 +31,8 @@ document.getElementById('loginForm')
         localStorage.setItem('usuarioEmail', data.usuario.Correo);
         localStorage.setItem('mostrarAlertaStock', 'true');
 
+        hideLoader();
+
         alert(`¡Bienvenido, ${data.usuario.Nombre}!`, () => {
           const rol = data.usuario.Rol;
 
@@ -42,10 +46,12 @@ document.getElementById('loginForm')
         });
 
       } else {
+        hideLoader();
         alert(data.message || 'Correo o contraseña incorrectos');
       }
 
     } catch (error) {
+      hideLoader();
       console.error('Error al iniciar sesión:', error);
       alert('Error de conexión. Asegúrate de que el servidor esté corriendo.');
     }

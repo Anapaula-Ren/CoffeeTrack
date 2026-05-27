@@ -246,14 +246,17 @@
       const accepted = await confirm('¿Estás seguro de eliminar este usuario?');
       if (!accepted) return;
 
+      showLoader('Eliminando usuario...');
       try {
         const res = await fetch(`${API_URL}/api/usuarios/${id}`, { method: 'DELETE' });
+        hideLoader();
         if (res.ok) {
           loadUsers();
         } else {
           alert('Error al eliminar usuario');
         }
       } catch (error) {
+        hideLoader();
         console.error(error);
         alert('Error de conexión');
       }
@@ -272,6 +275,7 @@
       const data = { nombre, correo, rol };
       if (contrasena) data.contrasena = contrasena;
 
+      showLoader('Guardando usuario...');
       try {
         const url = id ? `${API_URL}/api/usuarios/${id}` : `${API_URL}/api/usuarios`;
         const method = id ? 'PUT' : 'POST';
@@ -283,6 +287,7 @@
         });
 
         const result = await res.json();
+        hideLoader();
 
         if (result.success) {
           closeModal();
@@ -293,6 +298,7 @@
         }
 
       } catch (error) {
+        hideLoader();
         console.error(error);
         alert('Error de conexión');
       }

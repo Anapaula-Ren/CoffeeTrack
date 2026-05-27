@@ -308,6 +308,8 @@ async function actualizarProducto(nombreProducto, nuevaCantidad) {
       return;
     }
 
+    showLoader('Actualizando inventario...');
+
     const response = await fetch(`${API_URL}/api/inventario/producto/${idProducto}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -315,6 +317,7 @@ async function actualizarProducto(nombreProducto, nuevaCantidad) {
     });
 
     const data = await response.json();
+    hideLoader();
 
     if (data.success) {
       if (productoActual) {
@@ -328,6 +331,7 @@ async function actualizarProducto(nombreProducto, nuevaCantidad) {
     }
 
   } catch (error) {
+    hideLoader();
     console.error('❌ Error al actualizar producto:', error);
     alert('Error al actualizar el producto: ' + error.message);
   }
@@ -518,6 +522,7 @@ function abrirModalOrdenar(nombreProducto) {
 }
 
 async function enviarOrdenCorreo(orderData) {
+  showLoader('Enviando orden de compra...');
   try {
     const response = await fetch(`${API_URL}/api/inventario/ordenar`, {
       method: 'POST',
@@ -526,6 +531,7 @@ async function enviarOrdenCorreo(orderData) {
     });
 
     const data = await response.json();
+    hideLoader();
 
     if (response.ok && data.success) {
       alert(`✅ ${data.message}`);
@@ -535,6 +541,7 @@ async function enviarOrdenCorreo(orderData) {
     }
 
   } catch (error) {
+    hideLoader();
     console.error('Error al enviar orden:', error);
     alert('❌ Error de conexión. Verifique el servidor.');
   }
@@ -575,6 +582,7 @@ function resetearPrevisualizacion() {
 
 async function crearNuevoProducto(nombre, cantidad, imagenUrl) {
   const categoriaId = obtenerCategoriaActual();
+  showLoader('Agregando producto...');
   try {
     const response = await fetch(`${API_URL}/api/inventario/producto`, {
       method: 'POST',
@@ -588,6 +596,7 @@ async function crearNuevoProducto(nombre, cantidad, imagenUrl) {
     });
 
     const data = await response.json();
+    hideLoader();
 
     if (data.success) {
       cerrarModalAgregar();
@@ -597,6 +606,7 @@ async function crearNuevoProducto(nombre, cantidad, imagenUrl) {
       throw new Error(data.message || 'Error al crear el producto');
     }
   } catch (error) {
+    hideLoader();
     console.error('❌ Error al crear producto:', error);
     alert('Error al crear el producto: ' + error.message);
   }
@@ -665,9 +675,12 @@ async function confirmarEliminarProducto() {
     btnConfirmar.textContent = 'Eliminando...';
   }
 
+  showLoader('Eliminando producto...');
+
   try {
     const idProducto = await obtenerIdProducto(productoAEliminar);
     if (!idProducto) {
+      hideLoader();
       alert('Error: No se encontró el producto en la base de datos');
       cerrarModalEliminar();
       return;
@@ -678,6 +691,8 @@ async function confirmarEliminarProducto() {
     });
 
     const data = await response.json();
+    hideLoader();
+
     if (data.success) {
       const nombreEliminado = productoAEliminar;
       cerrarModalEliminar();
@@ -687,6 +702,7 @@ async function confirmarEliminarProducto() {
       throw new Error(data.message || 'Error al eliminar el producto');
     }
   } catch (error) {
+    hideLoader();
     console.error('❌ Error al eliminar producto:', error);
     alert('Error al eliminar el producto: ' + error.message);
     cerrarModalEliminar();

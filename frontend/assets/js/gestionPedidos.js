@@ -234,6 +234,8 @@ btnRegistrar.addEventListener('click', async () => {
   if (!nombre) return alert('El nombre es obligatorio.');
   if (!email) return alert('⚠️ El correo es obligatorio para nuevos clientes.');
 
+  showLoader('Registrando cliente...');
+
   try {
     const res = await fetch(`${API_URL}/api/clientes`, {
       method: 'POST',
@@ -241,6 +243,7 @@ btnRegistrar.addEventListener('click', async () => {
       body: JSON.stringify({ nombre, email })
     });
     const data = await res.json();
+    hideLoader();
 
     if (data.success) {
       // Mostrar mensaje de éxito en el modal antes de confirmar
@@ -255,7 +258,10 @@ btnRegistrar.addEventListener('click', async () => {
     } else {
       alert('Error: ' + data.message);
     }
-  } catch (error) { console.error(error); }
+  } catch (error) {
+    hideLoader();
+    console.error(error);
+  }
 });
 
 document.querySelectorAll('.mesa-card').forEach(btn => {
@@ -328,6 +334,8 @@ cerrarYConfirmarButton.addEventListener('click', async () => {
     usuarioRol: localStorage.getItem('usuarioRol')
   };
 
+  showLoader('Procesando pedido...');
+
   try {
     const response = await fetch(`${API_URL}/api/pedidos`, {
       method: 'POST',
@@ -335,6 +343,7 @@ cerrarYConfirmarButton.addEventListener('click', async () => {
       body: JSON.stringify(pedidoData)
     });
     const data = await response.json();
+    hideLoader();
 
     if (response.ok && data.success) {
       alert(`✅ Pedido #${data.idPedido} guardado con éxito.`);
@@ -343,6 +352,7 @@ cerrarYConfirmarButton.addEventListener('click', async () => {
       alert(`❌ Error: ${data.message}`);
     }
   } catch (error) {
+    hideLoader();
     console.error(error);
     alert('❌ Error de conexión.');
   }
@@ -741,6 +751,8 @@ async function abrirEditarRecetaModal(idProducto) {
   const productObj = allProducts.find(p => p.IdProducto === idProducto);
   if (!productObj) return;
 
+  showLoader('Cargando receta...');
+
   const recetaNombreProducto = document.getElementById('recetaNombreProducto');
   const recetaIngredientesContainer = document.getElementById('recetaIngredientesContainer');
 
@@ -757,6 +769,8 @@ async function abrirEditarRecetaModal(idProducto) {
 
   try {
     const res = await fetch(`${API_URL}/api/inventario/productos/${idProducto}/receta`);
+    hideLoader();
+
     if (!res.ok) throw new Error('Error al cargar la receta');
     const receta = await res.json();
 
@@ -769,6 +783,7 @@ async function abrirEditarRecetaModal(idProducto) {
       });
     }
   } catch (err) {
+    hideLoader();
     console.error(err);
     recetaIngredientesContainer.innerHTML = '<p style="color:#e53935; text-align:center; padding:15px;">❌ Error al cargar la receta.</p>';
   }
@@ -846,6 +861,8 @@ if (formReceta) {
       }
     });
 
+    showLoader('Guardando receta...');
+
     try {
       const res = await fetch(`${API_URL}/api/inventario/productos/${idProducto}/receta`, {
         method: 'PUT',
@@ -854,6 +871,7 @@ if (formReceta) {
       });
 
       const data = await res.json();
+      hideLoader();
 
       if (res.ok && data.success) {
         alert('✅ Receta actualizada correctamente en la base de datos.');
@@ -862,6 +880,7 @@ if (formReceta) {
         alert('❌ Error al actualizar la receta: ' + data.message);
       }
     } catch (err) {
+      hideLoader();
       console.error(err);
       alert('❌ Error de conexión al guardar la receta.');
     }
