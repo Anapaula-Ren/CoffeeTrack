@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="../../assets/css/pedidos.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="../../assets/js/customAlerts.js"></script>
 </head>
 
 <body>
@@ -336,7 +337,10 @@
             </label>
             <select id="persLeche" required
               style="width: 100%; padding: 12px; border: 2px solid #eae1db; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #3e2723; background-color: #fafafa; transition: border-color 0.3s; outline: none;">
-              <option value="">Cargando opciones...</option>
+              <option value="Sin Leche">No aplica (Sin Leche)</option>
+              <option value="Entera">Entera</option>
+              <option value="Deslactosada">Deslactosada</option>
+              <option value="Almendra">Almendra</option>
             </select>
           </div>
 
@@ -375,42 +379,53 @@
   <!-- Modal Editar Receta -->
   <div id="recetaModal" class="modal" style="display:none;">
     <div class="modal-content client-modal" style="max-width: 500px; padding: 20px;">
-      
+
       <!-- Encabezado Premium -->
-      <div class="modal-header-band" style="background: linear-gradient(135deg, #8d6e63, #5d4037); padding: 20px 25px; border-radius: 10px 10px 0 0; position: relative; margin: -20px -20px 20px -20px;">
-        <button type="button" class="modal-close-btn" id="btnCloseReceta" title="Cerrar" style="position: absolute; right: 15px; top: 18px; background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
+      <div class="modal-header-band"
+        style="background: linear-gradient(135deg, #8d6e63, #5d4037); padding: 20px 25px; border-radius: 10px 10px 0 0; position: relative; margin: -20px -20px 20px -20px;">
+        <button type="button" class="modal-close-btn" id="btnCloseReceta" title="Cerrar"
+          style="position: absolute; right: 15px; top: 18px; background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
           <i class="fa-solid fa-xmark"></i>
         </button>
-        <h3 class="modal-title" style="color: white; border-bottom: none; margin: 0; padding-bottom: 0; text-align: left; font-size: 1.3rem;">
+        <h3 class="modal-title"
+          style="color: white; border-bottom: none; margin: 0; padding-bottom: 0; text-align: left; font-size: 1.3rem;">
           <i class="fa-solid fa-mortar-pestle" style="color: #ffb74d; margin-right: 8px;"></i> Editar Receta Insumos
         </h3>
       </div>
-      
+
       <!-- Cuerpo del Modal -->
       <div style="padding: 15px 5px 5px 5px;">
-        <h4 id="recetaNombreProducto" style="text-align: left; margin: 0 0 10px 0; color: #5d4037; font-size: 1.25rem;">Producto</h4>
-        <p style="font-size: 0.85rem; color: #8d6e63; margin-bottom: 20px; text-align: left;">Define los ingredientes del inventario y las cantidades requeridas (en kg o litros) que se descontarán automáticamente al vender esta bebida.</p>
-        
+        <h4 id="recetaNombreProducto" style="text-align: left; margin: 0 0 10px 0; color: #5d4037; font-size: 1.25rem;">
+          Producto</h4>
+        <p style="font-size: 0.85rem; color: #8d6e63; margin-bottom: 20px; text-align: left;">Define los ingredientes
+          del inventario y las cantidades requeridas (en kg o litros) que se descontarán automáticamente al vender esta
+          bebida.</p>
+
         <form id="formReceta">
-          <div id="recetaIngredientesContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; padding-right: 5px;">
+          <div id="recetaIngredientesContainer"
+            style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; padding-right: 5px;">
             <!-- Filas de ingredientes dinámicas -->
           </div>
-          
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 25px;">
-            <button type="button" id="btnRecetaAgregarIngrediente" class="btn-cancel-client" style="margin: 0; padding: 10px 15px; background: #fffafa; border: 2px solid #efebe9; color: #795548; font-weight: 600; display: flex; align-items: center; gap: 6px; font-size: 0.9rem; outline: none; cursor: pointer;">
+
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 25px;">
+            <button type="button" id="btnRecetaAgregarIngrediente" class="btn-cancel-client"
+              style="margin: 0; padding: 10px 15px; background: #fffafa; border: 2px solid #efebe9; color: #795548; font-weight: 600; display: flex; align-items: center; gap: 6px; font-size: 0.9rem; outline: none; cursor: pointer;">
               <i class="fa-solid fa-plus"></i> Agregar Insumo
             </button>
           </div>
-          
+
           <div style="display: flex; gap: 15px;">
-            <button type="button" id="btnCancelarReceta" class="btn-cancel-client" style="flex: 1; margin: 0; padding: 12px; font-weight: bold;">Cancelar</button>
-            <button type="submit" class="add btn-confirm-client" style="flex: 1.5; margin: 0; padding: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <button type="button" id="btnCancelarReceta" class="btn-cancel-client"
+              style="flex: 1; margin: 0; padding: 12px; font-weight: bold;">Cancelar</button>
+            <button type="submit" class="add btn-confirm-client"
+              style="flex: 1.5; margin: 0; padding: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
               <i class="fa-solid fa-floppy-disk"></i> Guardar Receta
             </button>
           </div>
         </form>
       </div>
-      
+
     </div>
   </div>
 

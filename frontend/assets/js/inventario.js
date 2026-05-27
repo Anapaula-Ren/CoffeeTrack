@@ -14,7 +14,7 @@ const MAPA_IMAGENES_DEFAULT = {
   "agua": "imagenes/agua.jpg",
   "crema para batir": "imagenes/crema_para_batir.jpg",
   "canela molida": "imagenes/canela_molida.jpg",
-  
+
   // Comidas
   "sandwich de jamón y queso": "imagenes/sandwich_jamon_queso.jpg",
   "wrap de pollo": "imagenes/wrap_pollo.jpg",
@@ -22,14 +22,14 @@ const MAPA_IMAGENES_DEFAULT = {
   "muffin": "imagenes/muffin.jpg",
   "brownie": "imagenes/brownie.jpg",
   "dona": "imagenes/dona.jpg",
-  
+
   // Envases
   "bebida caliente": "imagenes/vaso_caliente.jpg",
   "bebida fría": "imagenes/vaso_frio.jpg",
   "servilletas": "imagenes/servilletas.jpg",
   "manga aislante": "imagenes/manga_aislante.jpg",
   "popotes": "imagenes/popotes.jpg",
-  
+
   // Limpieza
   "bolsa de basura": "imagenes/bolsa_basura.jpg",
   "esponja": "imagenes/esponja.jpg",
@@ -60,7 +60,7 @@ function renderizarProductos(productos) {
   productos.forEach(prod => {
     const nombre = prod.NombreProducto;
     const cantidad = parseFloat(prod.Cantidad) || 0;
-    
+
     // Obtener la imagen correcta
     let imagenUrl = prod.ImagenUrl;
     if (!imagenUrl) {
@@ -124,27 +124,27 @@ const userRole = localStorage.getItem('usuarioRol');
 
 if (userRole === 'Encargado de inventario') {
   const pedidosLink = document.querySelector('nav a[href*="Gestion de pedidos.html"]');
-  const panelLink   = document.querySelector('nav a[href*="Panel.html"]');
+  const panelLink = document.querySelector('nav a[href*="Panel.html"]');
   if (pedidosLink) pedidosLink.style.display = 'none';
-  if (panelLink)   panelLink.style.display   = 'none';
+  if (panelLink) panelLink.style.display = 'none';
 }
 
-const modal                = document.getElementById('modal_editar');
-const spanCerrar           = document.getElementsByClassName('cerrar')[0];
-const btnCancelar          = document.querySelector('.btn_cancelar');
-const formModal            = document.getElementById('form_modal');
-const inputNombreProducto  = document.getElementById('nombre_producto');
-const cantidadTotalInput   = document.getElementById('cantidad_total');
+const modal = document.getElementById('modal_editar');
+const spanCerrar = document.getElementsByClassName('cerrar')[0];
+const btnCancelar = document.querySelector('.btn_cancelar');
+const formModal = document.getElementById('form_modal');
+const inputNombreProducto = document.getElementById('nombre_producto');
+const cantidadTotalInput = document.getElementById('cantidad_total');
 const contenedorInventario = document.querySelector('.inventario');
 
-const ordenModal         = document.getElementById('ordenModal');
-const closeButton        = ordenModal?.querySelector('.close-button');
-const ordenForm          = document.getElementById('ordenForm');
-const productoTitulo     = document.getElementById('productoTitulo');
+const ordenModal = document.getElementById('ordenModal');
+const closeButton = ordenModal?.querySelector('.close-button');
+const ordenForm = document.getElementById('ordenForm');
+const productoTitulo = document.getElementById('productoTitulo');
 const ordenProductoNombre = document.getElementById('ordenProductoNombre');
-const ordenDestinoInput  = document.getElementById('ordenDestino');
+const ordenDestinoInput = document.getElementById('ordenDestino');
 
-let productoActual      = null;
+let productoActual = null;
 let productoNombreActual = null;
 
 function configurarRestriccionesPorRol() {
@@ -156,32 +156,32 @@ function configurarRestriccionesPorRol() {
     return;
   }
 
-  const usuariosLink         = document.getElementById('linkUsuarios');
+  const usuariosLink = document.getElementById('linkUsuarios');
   const btnReporteInventario = document.getElementById('btnReporteInventario');
 
   if (rol === 'Administrador') {
-    if (usuariosLink)         usuariosLink.style.display         = 'inline-block';
+    if (usuariosLink) usuariosLink.style.display = 'inline-block';
     if (btnReporteInventario) btnReporteInventario.style.display = 'block';
 
   } else if (rol === 'Encargado de inventario') {
-    if (usuariosLink)         usuariosLink.style.display         = 'none';
+    if (usuariosLink) usuariosLink.style.display = 'none';
     if (btnReporteInventario) btnReporteInventario.style.display = 'block';
 
   } else if (rol === 'Cajero/Mesero') {
-    if (usuariosLink)         usuariosLink.style.display         = 'none';
+    if (usuariosLink) usuariosLink.style.display = 'none';
     if (btnReporteInventario) btnReporteInventario.style.display = 'none';
   }
 }
 
 function deshabilitarFuncionesInventario() {
-  const rol               = localStorage.getItem('usuarioRol');
+  const rol = localStorage.getItem('usuarioRol');
   const rolesNoPermitidos = ['Cajero/Mesero'];
 
   if (rolesNoPermitidos.includes(rol)) {
     document.querySelectorAll('.btn_editar, .btn_ordenar').forEach(btn => {
-      btn.disabled      = true;
+      btn.disabled = true;
       btn.style.opacity = '0.4';
-      btn.style.cursor  = 'not-allowed';
+      btn.style.cursor = 'not-allowed';
       btn.onclick = (e) => {
         e.stopPropagation();
         alert('Acceso de modificación restringido al rol de ' + rol);
@@ -196,11 +196,11 @@ function obtenerCategoriaActual() {
   const nombreArchivo = window.location.pathname.split('/').pop();
 
   const mapeoCategorias = {
-    'inventario_bebidas.html':  1,
-    'inventario_comidas.html':  2,
-    'inventario_envases.html':  3,
+    'inventario_bebidas.html': 1,
+    'inventario_comidas.html': 2,
+    'inventario_envases.html': 3,
     'inventario_limpieza.html': 4,
-    'inventario_menu.html':     1
+    'inventario_menu.html': 1
   };
 
   return mapeoCategorias[nombreArchivo] || 1;
@@ -229,8 +229,8 @@ async function cargarProductos() {
 async function obtenerIdProducto(nombreProducto) {
   try {
     const categoriaId = obtenerCategoriaActual();
-    const response    = await fetch(`${API_URL}/api/inventario/categoria/${categoriaId}`);
-    const productos   = await response.json();
+    const response = await fetch(`${API_URL}/api/inventario/categoria/${categoriaId}`);
+    const productos = await response.json();
 
     const producto = productos.find(p =>
       p.NombreProducto?.trim().toLowerCase() === nombreProducto.trim().toLowerCase()
@@ -254,8 +254,8 @@ async function obtenerConfiguracionProducto(idProducto) {
 
     if (data.success) {
       return {
-        id:             data.producto.IdInventario,
-        nombre:         data.producto.NombreProducto,
+        id: data.producto.IdInventario,
+        nombre: data.producto.NombreProducto,
         cantidadActual: parseFloat(data.producto.Cantidad) || 0
       };
     } else {
@@ -283,9 +283,9 @@ async function abrirModal(nombreProducto) {
       return;
     }
 
-    productoNombreActual          = nombreProducto;
-    inputNombreProducto.value     = config.nombre;
-    cantidadTotalInput.value      = config.cantidadActual;
+    productoNombreActual = nombreProducto;
+    inputNombreProducto.value = config.nombre;
+    cantidadTotalInput.value = config.cantidadActual;
 
     setTimeout(() => {
       cantidadTotalInput.focus();
@@ -308,13 +308,16 @@ async function actualizarProducto(nombreProducto, nuevaCantidad) {
       return;
     }
 
+    showLoader('Actualizando inventario...');
+
     const response = await fetch(`${API_URL}/api/inventario/producto/${idProducto}`, {
-      method:  'PUT',
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ cantidad: nuevaCantidad })
+      body: JSON.stringify({ cantidad: nuevaCantidad })
     });
 
     const data = await response.json();
+    hideLoader();
 
     if (data.success) {
       if (productoActual) {
@@ -328,15 +331,16 @@ async function actualizarProducto(nombreProducto, nuevaCantidad) {
     }
 
   } catch (error) {
+    hideLoader();
     console.error('❌ Error al actualizar producto:', error);
     alert('Error al actualizar el producto: ' + error.message);
   }
 }
 
 function cerrarModal() {
-  modal.style.display   = 'none';
-  productoNombreActual  = null;
-  productoActual        = null;
+  modal.style.display = 'none';
+  productoNombreActual = null;
+  productoActual = null;
   formModal.reset();
 }
 
@@ -380,8 +384,8 @@ function generarHTMLReporte(inventario) {
         <tbody>
           ${inventario.map(item => `
             <tr>
-              <td>${item.ID      || 'N/A'}</td>
-              <td>${item.Nombre  || 'Sin nombre'}</td>
+              <td>${item.ID || 'N/A'}</td>
+              <td>${item.Nombre || 'Sin nombre'}</td>
               <td>${item.Categoria}</td>
               <td>${parseFloat(item.Cantidad) || 0}</td>
             </tr>
@@ -441,7 +445,7 @@ function generarHTMLStockBajo(stockBajo) {
         <tbody>
           ${stockBajo.map(item => `
             <tr>
-              <td>${item.ID     || 'N/A'}</td>
+              <td>${item.ID || 'N/A'}</td>
               <td>${item.Nombre || 'Sin nombre'}</td>
               <td>${item.Categoria}</td>
               <td>${parseFloat(item.Cantidad) || 0}</td>
@@ -509,23 +513,25 @@ function cerrarModalReporte() {
 
 function abrirModalOrdenar(nombreProducto) {
   if (productoTitulo && ordenProductoNombre) {
-    productoTitulo.textContent                       = nombreProducto;
-    ordenProductoNombre.value                        = nombreProducto;
-    document.getElementById('ordenCantidad').value   = 1;
-    document.getElementById('ordenMotivo').value     = '';
-    ordenModal.style.display                         = 'flex';
+    productoTitulo.textContent = nombreProducto;
+    ordenProductoNombre.value = nombreProducto;
+    document.getElementById('ordenCantidad').value = 1;
+    document.getElementById('ordenMotivo').value = '';
+    ordenModal.style.display = 'flex';
   }
 }
 
 async function enviarOrdenCorreo(orderData) {
+  showLoader('Enviando orden de compra...');
   try {
     const response = await fetch(`${API_URL}/api/inventario/ordenar`, {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(orderData)
+      body: JSON.stringify(orderData)
     });
 
     const data = await response.json();
+    hideLoader();
 
     if (response.ok && data.success) {
       alert(`✅ ${data.message}`);
@@ -535,6 +541,7 @@ async function enviarOrdenCorreo(orderData) {
     }
 
   } catch (error) {
+    hideLoader();
     console.error('Error al enviar orden:', error);
     alert('❌ Error de conexión. Verifique el servidor.');
   }
@@ -575,19 +582,21 @@ function resetearPrevisualizacion() {
 
 async function crearNuevoProducto(nombre, cantidad, imagenUrl) {
   const categoriaId = obtenerCategoriaActual();
+  showLoader('Agregando producto...');
   try {
     const response = await fetch(`${API_URL}/api/inventario/producto`, {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({
+      body: JSON.stringify({
         IdCategoriaInventario: categoriaId,
-        NombreProducto:        nombre,
-        Cantidad:              cantidad,
-        ImagenUrl:             imagenUrl || null
+        NombreProducto: nombre,
+        Cantidad: cantidad,
+        ImagenUrl: imagenUrl || null
       })
     });
 
     const data = await response.json();
+    hideLoader();
 
     if (data.success) {
       cerrarModalAgregar();
@@ -597,6 +606,7 @@ async function crearNuevoProducto(nombre, cantidad, imagenUrl) {
       throw new Error(data.message || 'Error al crear el producto');
     }
   } catch (error) {
+    hideLoader();
     console.error('❌ Error al crear producto:', error);
     alert('Error al crear el producto: ' + error.message);
   }
@@ -625,8 +635,8 @@ function agregarTarjetaProducto(nombre, cantidad, imagenUrl) {
   `;
   contenedor.appendChild(div);
 
-  div.querySelector('.btn_editar').onclick  = () => { productoActual = div; abrirModal(nombre); };
-  div.querySelector('.btn_ordenar').onclick  = () => abrirModalOrdenar(nombre);
+  div.querySelector('.btn_editar').onclick = () => { productoActual = div; abrirModal(nombre); };
+  div.querySelector('.btn_ordenar').onclick = () => abrirModalOrdenar(nombre);
   div.querySelector('.btn_eliminar').onclick = () => abrirModalEliminar(nombre, div);
 
   requestAnimationFrame(() => div.classList.add('producto-visible'));
@@ -661,13 +671,16 @@ async function confirmarEliminarProducto() {
 
   const btnConfirmar = document.getElementById('btnConfirmarEliminar');
   if (btnConfirmar) {
-    btnConfirmar.disabled    = true;
+    btnConfirmar.disabled = true;
     btnConfirmar.textContent = 'Eliminando...';
   }
+
+  showLoader('Eliminando producto...');
 
   try {
     const idProducto = await obtenerIdProducto(productoAEliminar);
     if (!idProducto) {
+      hideLoader();
       alert('Error: No se encontró el producto en la base de datos');
       cerrarModalEliminar();
       return;
@@ -678,6 +691,8 @@ async function confirmarEliminarProducto() {
     });
 
     const data = await response.json();
+    hideLoader();
+
     if (data.success) {
       const nombreEliminado = productoAEliminar;
       cerrarModalEliminar();
@@ -687,12 +702,13 @@ async function confirmarEliminarProducto() {
       throw new Error(data.message || 'Error al eliminar el producto');
     }
   } catch (error) {
+    hideLoader();
     console.error('❌ Error al eliminar producto:', error);
     alert('Error al eliminar el producto: ' + error.message);
     cerrarModalEliminar();
   } finally {
     if (btnConfirmar) {
-      btnConfirmar.disabled    = false;
+      btnConfirmar.disabled = false;
       btnConfirmar.textContent = 'Sí, eliminar';
     }
   }
@@ -722,9 +738,9 @@ function agregarEventListeners() {
     ?.addEventListener('click', abrirModalReporte);
 
   document.querySelectorAll('.btn_editar').forEach(boton => {
-    boton.onclick = function() {
+    boton.onclick = function () {
       productoActual = this.closest('.producto');
-      const nombre   = productoActual.querySelector('.nombre_del_producto')?.textContent?.trim();
+      const nombre = productoActual.querySelector('.nombre_del_producto')?.textContent?.trim();
       if (nombre) {
         abrirModal(nombre);
       } else {
@@ -734,7 +750,7 @@ function agregarEventListeners() {
   });
 
   document.querySelectorAll('.btn_ordenar').forEach(boton => {
-    boton.onclick = function() {
+    boton.onclick = function () {
       const nombre = this.closest('.producto')
         ?.querySelector('.nombre_del_producto')?.textContent?.trim();
       if (nombre) {
@@ -746,9 +762,9 @@ function agregarEventListeners() {
   });
 
   document.querySelectorAll('.btn_eliminar').forEach(boton => {
-    boton.onclick = function() {
+    boton.onclick = function () {
       const elemento = this.closest('.producto');
-      const nombre   = elemento?.querySelector('.nombre_del_producto')?.textContent?.trim();
+      const nombre = elemento?.querySelector('.nombre_del_producto')?.textContent?.trim();
       if (nombre) {
         abrirModalEliminar(nombre, elemento);
       } else {
@@ -759,7 +775,7 @@ function agregarEventListeners() {
 }
 
 if (formModal) {
-  formModal.addEventListener('submit', async function(e) {
+  formModal.addEventListener('submit', async function (e) {
     e.preventDefault();
 
     if (!productoNombreActual) {
@@ -783,20 +799,20 @@ if (ordenForm) {
     e.preventDefault();
 
     await enviarOrdenCorreo({
-      producto:      ordenProductoNombre.value,
-      cantidad:      parseInt(document.getElementById('ordenCantidad').value, 10),
-      motivo:        document.getElementById('ordenMotivo').value,
-      destino:       ordenDestinoInput.value,
+      producto: ordenProductoNombre.value,
+      cantidad: parseInt(document.getElementById('ordenCantidad').value, 10),
+      motivo: document.getElementById('ordenMotivo').value,
+      destino: ordenDestinoInput.value,
       usuarioNombre: localStorage.getItem('usuarioNombre') || 'Usuario Cafetería'
     });
   });
 }
 
 // Form Agregar Producto
-document.getElementById('formAgregarProducto')?.addEventListener('submit', async function(e) {
+document.getElementById('formAgregarProducto')?.addEventListener('submit', async function (e) {
   e.preventDefault();
-  const nombre    = document.getElementById('nuevoNombreProducto').value.trim();
-  const cantidad  = parseFloat(document.getElementById('nuevaCantidadProducto').value) || 0;
+  const nombre = document.getElementById('nuevoNombreProducto').value.trim();
+  const cantidad = parseFloat(document.getElementById('nuevaCantidadProducto').value) || 0;
   const imagenUrl = document.getElementById('nuevaImagenUrl')?.value.trim() || '';
   if (!nombre) {
     alert('Por favor ingresa el nombre del producto');
@@ -813,8 +829,8 @@ document.getElementById('formAgregarProducto')?.addEventListener('submit', async
 });
 
 // Previsualización de imagen en vivo
-document.getElementById('nuevaImagenUrl')?.addEventListener('input', function() {
-  const url  = this.value.trim();
+document.getElementById('nuevaImagenUrl')?.addEventListener('input', function () {
+  const url = this.value.trim();
   const prev = document.getElementById('previewImagen');
   const wrap = document.getElementById('previewWrap');
   if (!prev || !wrap) return;
@@ -822,7 +838,7 @@ document.getElementById('nuevaImagenUrl')?.addEventListener('input', function() 
     prev.src = url;
     wrap.style.display = 'block';
     prev.onerror = () => { wrap.style.display = 'none'; prev.src = ''; };
-    prev.onload  = () => { wrap.style.display = 'block'; };
+    prev.onload = () => { wrap.style.display = 'block'; };
   } else {
     wrap.style.display = 'none';
     prev.src = '';
@@ -835,20 +851,20 @@ document.getElementById('btnConfirmarEliminar')?.addEventListener('click', confi
 // Botón agregar en encabezado
 document.getElementById('btnAgregarProducto')?.addEventListener('click', abrirModalAgregar);
 
-if (spanCerrar)  spanCerrar.addEventListener('click',  cerrarModal);
+if (spanCerrar) spanCerrar.addEventListener('click', cerrarModal);
 if (btnCancelar) btnCancelar.addEventListener('click', cerrarModal);
 if (closeButton) closeButton.addEventListener('click', cerrarModalOrdenar);
 
 document.getElementById('closeReporteInventario')
   ?.addEventListener('click', cerrarModalReporte);
 
-window.addEventListener('click', function(e) {
-  if (e.target === modal)       cerrarModal();
-  if (e.target === ordenModal)  cerrarModalOrdenar();
+window.addEventListener('click', function (e) {
+  if (e.target === modal) cerrarModal();
+  if (e.target === ordenModal) cerrarModalOrdenar();
   if (e.target === document.getElementById('modalReporteInventario')) {
     cerrarModalReporte();
   }
-  if (e.target === document.getElementById('modalAgregarProducto'))  cerrarModalAgregar();
+  if (e.target === document.getElementById('modalAgregarProducto')) cerrarModalAgregar();
   if (e.target === document.getElementById('modalEliminarProducto')) cerrarModalEliminar();
 });
 
@@ -864,7 +880,7 @@ function mostrarErrorCarga(error) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   console.log('🚀 Inicializando sistema de inventario...');
 
   configurarRestriccionesPorRol();
@@ -901,9 +917,97 @@ async function verificarStockBajoAlEntrarInventario() {
   }
 }
 
+function showCustomAlert(title, message) {
+  const existingAlert = document.getElementById('custom-premium-alert');
+  if (existingAlert) existingAlert.remove();
+
+  const container = document.createElement('div');
+  container.id = 'custom-premium-alert';
+  container.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-family: 'Poppins', 'Inter', sans-serif;
+  `;
+
+  const formattedMessage = message
+    .replace(/\n/g, '<br>')
+    .replace(/🔴 PRODUCTOS CRÍTICOS:/g, '<strong style="color: #d32f2f; font-size: 1.12rem; display: block; margin-top: 10px; margin-bottom: 5px;"><i class="fa-solid fa-circle-exclamation"></i> PRODUCTOS CRÍTICOS:</strong>')
+    .replace(/🟡 PRODUCTOS BAJOS:/g, '<strong style="color: #fbc02d; font-size: 1.12rem; display: block; margin-top: 15px; margin-bottom: 5px;"><i class="fa-solid fa-triangle-exclamation"></i> PRODUCTOS BAJOS:</strong>')
+    .replace(/🚨 ATENCIÓN - STOCK BAJO/g, '<span style="display:none;"></span>')
+    .replace(/• /g, '<span style="color: #8d6e63; font-weight: bold; margin-left: 5px;">• </span>');
+
+  const alertBox = document.createElement('div');
+  alertBox.style.cssText = `
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    transform: translateY(30px);
+    transition: transform 0.3s ease;
+    border: 2px solid #5d4037;
+    text-align: center;
+  `;
+
+  alertBox.innerHTML = `
+    <div style="background: linear-gradient(135deg, #5d4037, #3e2723); padding: 18px 25px; border-radius: 12px 12px 0 0; margin: -30px -30px 20px -30px; display: flex; align-items: center; justify-content: center; gap: 10px; color: white;">
+      <i class="fa-solid fa-triangle-exclamation" style="color: #ffb74d; font-size: 1.5rem;"></i>
+      <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">${title}</h3>
+    </div>
+    <div style="text-align: left; color: #4e342e; line-height: 1.6; font-size: 0.98rem; max-height: 350px; overflow-y: auto; padding: 5px; margin-bottom: 25px;">
+      ${formattedMessage}
+    </div>
+    <button id="close-premium-alert-btn" style="
+      background: linear-gradient(135deg, #8d6e63, #5d4037);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(93, 64, 55, 0.25);
+      transition: all 0.2s ease;
+      width: 100%;
+      outline: none;
+    ">Aceptar</button>
+  `;
+
+  container.appendChild(alertBox);
+  document.body.appendChild(container);
+
+  requestAnimationFrame(() => {
+    container.style.opacity = '1';
+    alertBox.style.transform = 'translateY(0)';
+  });
+
+  const closeAlert = () => {
+    container.style.opacity = '0';
+    alertBox.style.transform = 'translateY(30px)';
+    setTimeout(() => container.remove(), 300);
+  };
+
+  document.getElementById('close-premium-alert-btn').addEventListener('click', closeAlert);
+  container.addEventListener('click', (e) => {
+    if (e.target === container) closeAlert();
+  });
+}
+
 function mostrarAlertaStockBajo(stockBajo) {
   const productosCriticos = stockBajo.filter(p => p.Estado === 'CRÍTICO');
-  const productosBajos    = stockBajo.filter(p => p.Estado === 'BAJO');
+  const productosBajos = stockBajo.filter(p => p.Estado === 'BAJO');
 
   let mensaje = '🚨 ATENCIÓN - STOCK BAJO\n\n';
 
@@ -923,5 +1027,5 @@ function mostrarAlertaStockBajo(stockBajo) {
   }
 
   mensaje += '\n⚠️ Por favor, revisa el inventario y genera las órdenes necesarias.';
-  alert(mensaje);
+  showCustomAlert('🚨 ATENCIÓN - STOCK BAJO', mensaje);
 }

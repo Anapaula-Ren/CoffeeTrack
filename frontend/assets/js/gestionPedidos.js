@@ -234,6 +234,8 @@ btnRegistrar.addEventListener('click', async () => {
   if (!nombre) return alert('El nombre es obligatorio.');
   if (!email) return alert('⚠️ El correo es obligatorio para nuevos clientes.');
 
+  showLoader('Registrando cliente...');
+
   try {
     const res = await fetch(`${API_URL}/api/clientes`, {
       method: 'POST',
@@ -241,6 +243,7 @@ btnRegistrar.addEventListener('click', async () => {
       body: JSON.stringify({ nombre, email })
     });
     const data = await res.json();
+    hideLoader();
 
     if (data.success) {
       // Mostrar mensaje de éxito en el modal antes de confirmar
@@ -255,7 +258,10 @@ btnRegistrar.addEventListener('click', async () => {
     } else {
       alert('Error: ' + data.message);
     }
-  } catch (error) { console.error(error); }
+  } catch (error) {
+    hideLoader();
+    console.error(error);
+  }
 });
 
 document.querySelectorAll('.mesa-card').forEach(btn => {
@@ -312,11 +318,11 @@ cerrarYConfirmarButton.addEventListener('click', async () => {
     const precio = parseFloat(item.precio.replace('Precio: $', '').trim());
     const subtotal = precio * item.cantidad;
     total += subtotal;
-    return { 
-      id: item.idProducto, 
-      cantidad: item.cantidad, 
+    return {
+      id: item.idProducto,
+      cantidad: item.cantidad,
       subtotal: parseFloat(subtotal.toFixed(2)),
-      personalizado: item.personalizado 
+      personalizado: item.personalizado
     };
   });
 
@@ -328,6 +334,8 @@ cerrarYConfirmarButton.addEventListener('click', async () => {
     usuarioRol: localStorage.getItem('usuarioRol')
   };
 
+  showLoader('Procesando pedido...');
+
   try {
     const response = await fetch(`${API_URL}/api/pedidos`, {
       method: 'POST',
@@ -335,6 +343,7 @@ cerrarYConfirmarButton.addEventListener('click', async () => {
       body: JSON.stringify(pedidoData)
     });
     const data = await response.json();
+    hideLoader();
 
     if (response.ok && data.success) {
       alert(`✅ Pedido #${data.idPedido} guardado con éxito.`);
@@ -343,6 +352,7 @@ cerrarYConfirmarButton.addEventListener('click', async () => {
       alert(`❌ Error: ${data.message}`);
     }
   } catch (error) {
+    hideLoader();
     console.error(error);
     alert('❌ Error de conexión.');
   }
@@ -373,7 +383,7 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
 
     // Verificar si el producto es de tipo Bebidas
     const productObj = allProducts.find(p => p.IdProducto === idProducto);
-    if (productObj && productObj.Categoria === 'Bebidas') {
+    if (productObj && (productObj.Categoria === 'Bebidas' || (productObj.Categorium && productObj.Categorium.Nombre === 'Bebidas'))) {
       // Validar primero si hay un cliente o mesa seleccionada
       const idCliente = document.getElementById('idClienteFinal').value;
       if (!idCliente) {
@@ -391,6 +401,7 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
       persNombreProducto.textContent = productObj.Nombre;
       persNombreProducto.dataset.id = idProducto;
       persShotsInput.value = '1';
+      persLeche.value = 'Sin Leche';
 
       // Resetear visualización de los botones de shots
       document.querySelectorAll('.shot-btn').forEach(btn => {
@@ -406,24 +417,6 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
           btn.style.color = '#795548';
         }
       });
-
-      // Cargar tipos de leche desde la base de datos
-      try {
-        persLeche.innerHTML = '<option value="">Cargando opciones...</option>';
-        const res = await fetch(`${API_URL}/api/pedidos/leches`);
-        if (!res.ok) throw new Error('Error al obtener leches');
-        const leches = await res.json();
-        
-        if (leches.length === 0) {
-          persLeche.innerHTML = '<option value="0">No aplica (Sin Leche)</option>';
-        } else {
-          persLeche.innerHTML = '<option value="0">No aplica (Sin Leche)</option>' + 
-            leches.map(l => `<option value="${l.IdLeche}">${l.Nombre}</option>`).join('');
-        }
-      } catch (err) {
-        console.error(err);
-        persLeche.innerHTML = '<option value="">Error al cargar tipos de leche</option>';
-      }
 
       personalizadoModal.style.display = 'flex';
       return;
@@ -691,7 +684,7 @@ if (formPersonalizado) {
     e.preventDefault();
 
     const idProducto = parseInt(document.getElementById('persNombreProducto').dataset.id, 10);
-    const idLeche = parseInt(document.getElementById('persLeche').value, 10);
+    const tipoLeche = document.getElementById('persLeche').value;
     const shots = parseInt(document.getElementById('persShots').value, 10);
     const idCliente = document.getElementById('idClienteFinal').value;
 
@@ -699,11 +692,6 @@ if (formPersonalizado) {
       alert('⚠️ No hay cliente o mesa seleccionada.');
       personalizadoModal.style.display = 'none';
       clienteInitModal.style.display = 'flex';
-      return;
-    }
-
-    if (isNaN(idLeche)) {
-      alert('Por favor selecciona un tipo de leche.');
       return;
     }
 
@@ -715,7 +703,7 @@ if (formPersonalizado) {
 
     // Obtener descripción de la leche elegida
     let descLeche = 'Sin leche';
-    if (idLeche > 0) {
+    if (tipoLeche !== 'Sin Leche') {
       const milkOption = document.querySelector('#persLeche option:checked');
       descLeche = milkOption ? `Leche: ${milkOption.textContent.trim()}` : 'Leche';
     }
@@ -730,7 +718,7 @@ if (formPersonalizado) {
       nombre: nombreCustomizado,
       precio: precioFormat,
       cantidad: 1,
-      personalizado: { idLeche, shots }
+      personalizado: { tipoLeche, shots }
     });
 
     // Desactivar el botón check de esa tarjeta para evitar duplicados accidentales
@@ -763,6 +751,8 @@ async function abrirEditarRecetaModal(idProducto) {
   const productObj = allProducts.find(p => p.IdProducto === idProducto);
   if (!productObj) return;
 
+  showLoader('Cargando receta...');
+
   const recetaNombreProducto = document.getElementById('recetaNombreProducto');
   const recetaIngredientesContainer = document.getElementById('recetaIngredientesContainer');
 
@@ -779,6 +769,8 @@ async function abrirEditarRecetaModal(idProducto) {
 
   try {
     const res = await fetch(`${API_URL}/api/inventario/productos/${idProducto}/receta`);
+    hideLoader();
+
     if (!res.ok) throw new Error('Error al cargar la receta');
     const receta = await res.json();
 
@@ -791,6 +783,7 @@ async function abrirEditarRecetaModal(idProducto) {
       });
     }
   } catch (err) {
+    hideLoader();
     console.error(err);
     recetaIngredientesContainer.innerHTML = '<p style="color:#e53935; text-align:center; padding:15px;">❌ Error al cargar la receta.</p>';
   }
@@ -868,6 +861,8 @@ if (formReceta) {
       }
     });
 
+    showLoader('Guardando receta...');
+
     try {
       const res = await fetch(`${API_URL}/api/inventario/productos/${idProducto}/receta`, {
         method: 'PUT',
@@ -876,6 +871,7 @@ if (formReceta) {
       });
 
       const data = await res.json();
+      hideLoader();
 
       if (res.ok && data.success) {
         alert('✅ Receta actualizada correctamente en la base de datos.');
@@ -884,6 +880,7 @@ if (formReceta) {
         alert('❌ Error al actualizar la receta: ' + data.message);
       }
     } catch (err) {
+      hideLoader();
       console.error(err);
       alert('❌ Error de conexión al guardar la receta.');
     }
