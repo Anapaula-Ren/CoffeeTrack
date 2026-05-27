@@ -86,9 +86,9 @@ class PedidosController {
   }
 
   async crearPedidoPersonalizado(req, res, next) {
-    const { idProducto, idLeche, shots, idCliente, idUsuario } = req.body;
+    const { idProducto, tipoLeche, shots, idCliente, idUsuario } = req.body;
     try {
-      const result = await pedidosService.crearPedidoPersonalizado({ idProducto, idLeche, shots, idCliente, idUsuario });
+      const result = await pedidosService.crearPedidoPersonalizado({ idProducto, tipoLeche, shots, idCliente, idUsuario });
       res.json({
         success: true,
         message: 'Pedido personalizado registrado y descontado del inventario correctamente',

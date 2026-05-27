@@ -4,7 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"No tests\""
+    "test": "jest"
+  },
+  "jest": {
+    "testMatch": [
+      "**/src/tests/**/*Test.js"
+    ],
+    "testEnvironment": "node",
+    "verbose": true
   },
   "keywords": [],
   "author": "",
@@ -20,7 +27,12 @@
     "mssql": "^12.5.4",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.7",
-    "sequelize": "^6.37.8",
     "tedious": "^19.2.1"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1",
+    "supertest": "^7.2.2"
   }
 }
