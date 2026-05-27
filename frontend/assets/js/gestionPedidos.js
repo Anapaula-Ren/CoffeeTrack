@@ -312,11 +312,11 @@ cerrarYConfirmarButton.addEventListener('click', async () => {
     const precio = parseFloat(item.precio.replace('Precio: $', '').trim());
     const subtotal = precio * item.cantidad;
     total += subtotal;
-    return { 
-      id: item.idProducto, 
-      cantidad: item.cantidad, 
+    return {
+      id: item.idProducto,
+      cantidad: item.cantidad,
       subtotal: parseFloat(subtotal.toFixed(2)),
-      personalizado: item.personalizado 
+      personalizado: item.personalizado
     };
   });
 
@@ -373,7 +373,7 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
 
     // Verificar si el producto es de tipo Bebidas
     const productObj = allProducts.find(p => p.IdProducto === idProducto);
-    if (productObj && productObj.Categoria === 'Bebidas') {
+    if (productObj && (productObj.Categoria === 'Bebidas' || (productObj.Categorium && productObj.Categorium.Nombre === 'Bebidas'))) {
       // Validar primero si hay un cliente o mesa seleccionada
       const idCliente = document.getElementById('idClienteFinal').value;
       if (!idCliente) {
@@ -391,6 +391,7 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
       persNombreProducto.textContent = productObj.Nombre;
       persNombreProducto.dataset.id = idProducto;
       persShotsInput.value = '1';
+      persLeche.value = 'Sin Leche';
 
       // Resetear visualización de los botones de shots
       document.querySelectorAll('.shot-btn').forEach(btn => {
@@ -406,24 +407,6 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
           btn.style.color = '#795548';
         }
       });
-
-      // Cargar tipos de leche desde la base de datos
-      try {
-        persLeche.innerHTML = '<option value="">Cargando opciones...</option>';
-        const res = await fetch(`${API_URL}/api/pedidos/leches`);
-        if (!res.ok) throw new Error('Error al obtener leches');
-        const leches = await res.json();
-        
-        if (leches.length === 0) {
-          persLeche.innerHTML = '<option value="0">No aplica (Sin Leche)</option>';
-        } else {
-          persLeche.innerHTML = '<option value="0">No aplica (Sin Leche)</option>' + 
-            leches.map(l => `<option value="${l.IdLeche}">${l.Nombre}</option>`).join('');
-        }
-      } catch (err) {
-        console.error(err);
-        persLeche.innerHTML = '<option value="">Error al cargar tipos de leche</option>';
-      }
 
       personalizadoModal.style.display = 'flex';
       return;
@@ -691,7 +674,7 @@ if (formPersonalizado) {
     e.preventDefault();
 
     const idProducto = parseInt(document.getElementById('persNombreProducto').dataset.id, 10);
-    const idLeche = parseInt(document.getElementById('persLeche').value, 10);
+    const tipoLeche = document.getElementById('persLeche').value;
     const shots = parseInt(document.getElementById('persShots').value, 10);
     const idCliente = document.getElementById('idClienteFinal').value;
 
@@ -699,11 +682,6 @@ if (formPersonalizado) {
       alert('⚠️ No hay cliente o mesa seleccionada.');
       personalizadoModal.style.display = 'none';
       clienteInitModal.style.display = 'flex';
-      return;
-    }
-
-    if (isNaN(idLeche)) {
-      alert('Por favor selecciona un tipo de leche.');
       return;
     }
 
@@ -715,7 +693,7 @@ if (formPersonalizado) {
 
     // Obtener descripción de la leche elegida
     let descLeche = 'Sin leche';
-    if (idLeche > 0) {
+    if (tipoLeche !== 'Sin Leche') {
       const milkOption = document.querySelector('#persLeche option:checked');
       descLeche = milkOption ? `Leche: ${milkOption.textContent.trim()}` : 'Leche';
     }
@@ -730,7 +708,7 @@ if (formPersonalizado) {
       nombre: nombreCustomizado,
       precio: precioFormat,
       cantidad: 1,
-      personalizado: { idLeche, shots }
+      personalizado: { tipoLeche, shots }
     });
 
     // Desactivar el botón check de esa tarjeta para evitar duplicados accidentales
