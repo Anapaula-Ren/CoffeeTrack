@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-// Bases de datos
+// Base de datos
 const { sequelize } = require('./config/sql');
 const { connectMongo } = require('./config/nosql');
 
