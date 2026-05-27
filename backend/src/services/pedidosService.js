@@ -4,15 +4,55 @@ const { AppError } = require('../middleware/errorHandler');
 
 class PedidosService {
   async obtenerPedidosPendientes() {
-    return await pedidosModel.obtenerPedidosPendientes();
+    const rawPedidos = await pedidosModel.obtenerPedidosPendientes();
+    return rawPedidos.map(pedido => {
+      const total = parseFloat(pedido.Total);
+      const subtotal = parseFloat((total / 1.16).toFixed(2));
+      const iva = parseFloat((total - subtotal).toFixed(2));
+      return {
+        IdPedido: pedido.IdPedido,
+        IdCliente: pedido.IdCliente,
+        Fecha: pedido.Fecha,
+        Total: total,
+        Estado: pedido.Estado,
+        IdUsuario: pedido.IdUsuario,
+        NombreCliente: pedido.ClienteDetalle ? pedido.ClienteDetalle.Nombre : 'Sin Cliente',
+        NombreUsuario: pedido.UsuarioDetalle ? pedido.UsuarioDetalle.Nombre : 'Sin Usuario',
+        IVA: iva
+      };
+    });
   }
 
   async obtenerPedidosCompletados() {
-    return await pedidosModel.obtenerPedidosCompletados();
+    const rawPedidos = await pedidosModel.obtenerPedidosCompletados();
+    return rawPedidos.map(pedido => {
+      const total = parseFloat(pedido.Total);
+      const subtotal = parseFloat((total / 1.16).toFixed(2));
+      const iva = parseFloat((total - subtotal).toFixed(2));
+      return {
+        IdPedido: pedido.IdPedido,
+        IdCliente: pedido.IdCliente,
+        Fecha: pedido.Fecha,
+        Total: total,
+        Estado: pedido.Estado,
+        IdUsuario: pedido.IdUsuario,
+        NombreCliente: pedido.ClienteDetalle ? pedido.ClienteDetalle.Nombre : 'Sin Cliente',
+        NombreUsuario: pedido.UsuarioDetalle ? pedido.UsuarioDetalle.Nombre : 'Sin Usuario',
+        IVA: iva
+      };
+    });
   }
 
   async obtenerDetallePedido(id) {
-    return await pedidosModel.obtenerDetallePedido(id);
+    const rawDetails = await pedidosModel.obtenerDetallePedido(id);
+    return rawDetails.map(item => ({
+      IdPedido: item.IdPedido,
+      IdProducto: item.IdProducto,
+      Cantidad: item.Cantidad,
+      Subtotal: parseFloat(item.Subtotal),
+      NombreProducto: item.ProductoDetalle ? item.ProductoDetalle.Nombre : 'Producto Desconocido',
+      PrecioUnitario: item.ProductoDetalle ? parseFloat(item.ProductoDetalle.Precio) : 0.00
+    }));
   }
 
   async obtenerClientePedido(id) {
