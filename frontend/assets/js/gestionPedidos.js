@@ -34,13 +34,6 @@ const categorySelect = document.getElementById('newProdCategory');
 
 const userRole = localStorage.getItem('usuarioRol');
 
-if (userRole === 'Encargado de inventario') {
-  const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
-  const panelLink = document.querySelector('nav a[href*="Panel.html"]');
-  if (pedidosLink) pedidosLink.style.display = 'none';
-  if (panelLink) panelLink.style.display = 'none';
-}
-
 document.getElementById('btnCerrarSesion')
   ?.addEventListener('click', function (e) {
     e.preventDefault();
@@ -53,6 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   clienteInitModal.style.display = 'flex';
 
+  if (userRole === 'Encargado de inventario') {
+    const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
+    const panelLink = document.querySelector('nav a[href*="Panel.html"]');
+    if (pedidosLink) pedidosLink.style.display = 'none';
+    if (panelLink) panelLink.style.display = 'none';
+  }
+  
   if (userRole === 'Cajero/Mesero') {
     const inventarioLink = document.querySelector('nav a[href*="Inventario"]');
     if (inventarioLink) inventarioLink.style.display = 'none';
