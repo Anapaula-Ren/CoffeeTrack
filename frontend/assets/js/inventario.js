@@ -119,27 +119,6 @@ function renderizarProductos(productos) {
     ?.addEventListener('click', abrirModalReporte);
 }
 
-
-const userRole = localStorage.getItem('usuarioRol');
-
-if (userRole === 'Encargado de inventario') {
-    const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
-    const panelLink = document.querySelector('nav a[href*="Panel.html"]');
-    if (pedidosLink) pedidosLink.style.display = 'none';
-    if (panelLink) panelLink.style.display = 'none';
-  }
-  
-  if (userRole === 'Cajero/Mesero') {
-    const inventarioLink = document.querySelector('nav a[href*="Inventario"]');
-    if (inventarioLink) inventarioLink.style.display = 'none';
-  }
-
-  if (userRole === 'Administrador') {
-    const linkUsuarios = document.getElementById('linkUsuarios');
-    if (linkUsuarios) linkUsuarios.style.display = 'inline-block';
-    if (btnAddProduct) btnAddProduct.style.display = 'inline-block';
-  }
-
 const modal = document.getElementById('modal_editar');
 const spanCerrar = document.getElementsByClassName('cerrar')[0];
 const btnCancelar = document.querySelector('.btn_cancelar');
