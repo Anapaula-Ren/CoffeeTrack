@@ -394,32 +394,7 @@ if (esBebida) {
   target.style.cursor = 'default';
   await agregarUnidadesConPersonalizacion(productObj, cantidad);  // SIN EL 'add'
 }
-//fin ver 2
-  /*if (esBebida) {
-  const idCliente = document.getElementById('idClienteFinal').value;
-  if (!idCliente) {
-    alert('⚠️ Selecciona un cliente o mesa primero.');
-    clienteInitModal.style.display = 'flex';
-    return;
-  }
-  target.disabled = true;
-  target.style.backgroundColor = '#ccc';
-  target.style.cursor = 'default';
-  await agregarUnidadesConPersonalizacion(productObj, cantidad, 'add');
-}*/
-//fin ver 1
-  /*if (esBebida) {
-    const idCliente = document.getElementById('idClienteFinal').value;
-    if (!idCliente) {
-      alert('⚠️ Selecciona un cliente o mesa primero.');
-      clienteInitModal.style.display = 'flex';
-      return;
-    }
-    target.disabled = true;
-    target.style.backgroundColor = '#ccc';
-    target.style.cursor = 'default';
-    await agregarUnidadesConPersonalizacion(productObj, cantidad);
-  }*/ 
+
   else {
     // Producto normal (no bebida)
     const nombre = card.querySelector('.producto-nombre').textContent.trim();
@@ -436,71 +411,7 @@ if (esBebida) {
     mostrarResumenPedido();
   }
 }
-  /*if (target.classList.contains('ok')) {
-    if (target.disabled) return;
-
-    const idProducto = parseInt(card.dataset.id, 10);
-    const nombre = card.querySelector('.producto-nombre').textContent.trim();
-    const precio = card.querySelector('.producto-precio').textContent.trim();
-    const cantidadInput = card.querySelector('.producto-cantidad');
-    const cantidad = parseInt(cantidadInput.value, 10);
-
-    if (cantidad < 1 || isNaN(cantidad)) return alert('Cantidad inválida');
-
-    // Verificar si el producto es de tipo Bebidas
-    const productObj = allProducts.find(p => p.IdProducto === idProducto);
-    if (productObj && (productObj.Categoria === 'Bebidas' || (productObj.Categorium && productObj.Categorium.Nombre === 'Bebidas'))) {
-      // Validar primero si hay un cliente o mesa seleccionada
-      const idCliente = document.getElementById('idClienteFinal').value;
-      if (!idCliente) {
-        alert('⚠️ Selecciona un cliente o mesa primero antes de personalizar la bebida.');
-        clienteInitModal.style.display = 'flex';
-        return;
-      }
-
-      // Abrir Modal de Personalización
-       
-     /* const personalizadoModal = document.getElementById('personalizadoModal');
-      const persNombreProducto = document.getElementById('persNombreProducto');
-      const persLeche = document.getElementById('persLeche');
-      const persShotsInput = document.getElementById('persShots');
-
-      persNombreProducto.textContent = productObj.Nombre;
-      persNombreProducto.dataset.id = idProducto;
-      persShotsInput.value = '1';
-      persLeche.value = 'Sin Leche';
-
-      // Resetear visualización de los botones de shots
-      document.querySelectorAll('.shot-btn').forEach(btn => {
-        if (btn.dataset.value === '1') {
-          btn.classList.add('active');
-          btn.style.border = '2px solid #8d6e63';
-          btn.style.background = '#efebe9';
-          btn.style.color = '#5d4037';
-        } else {
-          btn.classList.remove('active');
-          btn.style.border = '2px solid #eae1db';
-          btn.style.background = 'white';
-          btn.style.color = '#795548';
-        }
-      });
-
-      personalizadoModal.style.display = 'flex';
-      return; XXXXXXXXXXXXXXXXXXX
-    }
-
-    const existente = pedidoActual.find(p => p.idProducto === idProducto);
-    if (existente) {
-      existente.cantidad += cantidad;
-    } else {
-      pedidoActual.push({ idProducto, nombre, precio, cantidad });
-      target.disabled = true;
-      target.style.backgroundColor = '#ccc';
-      target.style.cursor = 'default';
-    }
-    mostrarResumenPedido();
-  }*/
- // nuevo edit
+  
 if (target.classList.contains('edit')) {
   const idProducto = parseInt(card.dataset.id, 10);
   const cantidadInput = card.querySelector('.producto-cantidad');
@@ -550,84 +461,7 @@ if (target.classList.contains('edit')) {
     }
   }
 }
- //fin ver 2
-/* if (target.classList.contains('edit')) {
-  const idProducto = parseInt(card.dataset.id, 10);
-  const cantidadInput = card.querySelector('.producto-cantidad');
-  let nuevaCantidad = parseInt(cantidadInput.value, 10);
-  if (isNaN(nuevaCantidad) || nuevaCantidad < 1) return alert('Cantidad inválida');
 
-  const productObj = allProducts.find(p => p.IdProducto === idProducto);
-  const esBebida = productObj && (productObj.Categoria === 'Bebidas' || (productObj.Categorium && productObj.Categorium.Nombre === 'Bebidas'));
-
-  if (esBebida) {
-  // Buscar el PRIMER ítem con este id y que tenga personalización
-  const existingIndex = pedidoActual.findIndex(item => item.idProducto === idProducto && item.personalizado);
-  if (existingIndex === -1) {
-    alert('Este producto no está en el pedido. Agrégalo primero con ✔');
-    return;
-  }
-  
-  // Guardar referencia al botón OK de la tarjeta
-  const okButton = card.querySelector('.ok');
-  if (okButton) {
-    okButton.disabled = true;
-    okButton.style.backgroundColor = '#ccc';
-    okButton.style.cursor = 'default';
-  }
-  
-  // Llamar a la función en modo 'edit' pasando el índice del ítem a reemplazar
-  await agregarUnidadesConPersonalizacion(productObj, nuevaCantidad, 'edit', existingIndex);
-}
-  /*if (esBebida) {
-    // Buscar el primer ítem con este id y que tenga personalización
-    const existingIndex = pedidoActual.findIndex(item => item.idProducto === idProducto && item.personalizado);
-    if (existingIndex === -1) {
-      alert('Este producto no está en el pedido. Agrégalo primero con ✔');
-      return;
-    }
-    // Eliminar el ítem existente
-    pedidoActual.splice(existingIndex, 1);
-    
-    // Deshabilitar botón OK de la tarjeta
-    const okButton = card.querySelector('.ok');
-    if (okButton) {
-      okButton.disabled = true;
-      okButton.style.backgroundColor = '#ccc';
-      okButton.style.cursor = 'default';
-    }
-    
-    await agregarUnidadesConPersonalizacion(productObj, nuevaCantidad);
-  } 
-  
-  else {
-    const existente = pedidoActual.find(p => p.idProducto === idProducto);
-    if (existente) {
-      existente.cantidad = nuevaCantidad;
-      mostrarResumenPedido();
-      alert('Cantidad actualizada.');
-    } else {
-      alert('Producto no añadido aún. Usa ✔ primero.');
-    }
-  }
-}*/
- //fin nuevo edit
-  /*if (target.classList.contains('edit')) {
-    const idProducto = parseInt(card.dataset.id, 10);
-    const cantidadInput = card.querySelector('.producto-cantidad');
-    const nuevaCantidad = parseInt(cantidadInput.value, 10);
-
-    if (isNaN(nuevaCantidad) || nuevaCantidad < 1) return alert('Cantidad inválida');
-
-    const existente = pedidoActual.find(p => p.idProducto === idProducto);
-    if (existente) {
-      existente.cantidad = nuevaCantidad;
-      mostrarResumenPedido();
-      alert('Cantidad actualizada.');
-    } else {
-      alert('Producto no añadido aún. Usa ✔ primero.');
-    }
-  }*/
 
   if (target.classList.contains('delete')) {
     const idProducto = parseInt(card.dataset.id, 10);
@@ -882,63 +716,7 @@ if (formPersonalizado) {
     pendingPersonalizationResolver = null;
   });
 }
-/*if (formPersonalizado) {
-  formPersonalizado.addEventListener('submit', async (e) => {
-    e.preventDefault();
 
-    const idProducto = parseInt(document.getElementById('persNombreProducto').dataset.id, 10);
-    const tipoLeche = document.getElementById('persLeche').value;
-    const shots = parseInt(document.getElementById('persShots').value, 10);
-    const idCliente = document.getElementById('idClienteFinal').value;
-
-    if (!idCliente) {
-      alert('⚠️ No hay cliente o mesa seleccionada.');
-      personalizadoModal.style.display = 'none';
-      clienteInitModal.style.display = 'flex';
-      return;
-    }
-
-    const productObj = allProducts.find(p => p.IdProducto === idProducto);
-    if (!productObj) {
-      alert('Bebida no encontrada en el menú.');
-      return;
-    }
-
-    // Obtener descripción de la leche elegida
-    let descLeche = 'Sin leche';
-    if (tipoLeche !== 'Sin Leche') {
-      const milkOption = document.querySelector('#persLeche option:checked');
-      descLeche = milkOption ? `Leche: ${milkOption.textContent.trim()}` : 'Leche';
-    }
-
-    const descShots = shots === 0 ? 'Sin espresso' : `${shots} Shot(s)`;
-    const nombreCustomizado = `${productObj.Nombre} (${descLeche}, ${descShots})`;
-    const precioFormat = `Precio: $${productObj.Precio}`;
-
-    // Agregar al carrito en memoria con su objeto de personalización
-    pedidoActual.push({
-      idProducto,
-      nombre: nombreCustomizado,
-      precio: precioFormat,
-      cantidad: 1,
-      personalizado: { tipoLeche, shots }
-    });
-
-    // Desactivar el botón check de esa tarjeta para evitar duplicados accidentales
-    const okButton = document.querySelector(`.card[data-id="${idProducto}"] .ok`);
-    if (okButton) {
-      okButton.disabled = true;
-      okButton.style.backgroundColor = '#ccc';
-      okButton.style.cursor = 'default';
-    }
-
-    // Cerrar el modal de personalización
-    personalizadoModal.style.display = 'none';
-
-    // Abrir de forma inmediata el modal de resumen/detalles de pedido
-    mostrarResumenPedido();
-  });
-}*/
 function rechazarPersonalizacion() {
   if (pendingPersonalizationRejecter) {
     pendingPersonalizationRejecter(new Error('cancelado'));
@@ -1057,38 +835,7 @@ function abrirModalPersonalizacionConPromesa(producto, valoresActuales = null) {
   });
 }
 
-//funcion agregada powa 2/27/26 7:01
-//funcion agregada powa 2/27/26 7:01 (MODIFICADA PARA EDITAR)
-/*async function agregarUnidadesConPersonalizacion(producto, cantidad, modo = 'add', existingItemIndex = null) {
-  const nuevosItems = [];
-  
-  for (let i = 0; i < cantidad; i++) {
-    try {
-      const personalizacion = await abrirModalPersonalizacionConPromesa(producto);
-      const precioFormat = `Precio: $${producto.Precio}`;
-      nuevosItems.push({
-        idProducto: producto.IdProducto,
-        nombre: personalizacion.nombreCustomizado,
-        precio: precioFormat,
-        cantidad: 1,
-        personalizado: { tipoLeche: personalizacion.tipoLeche, shots: personalizacion.shots }
-      });
-    } catch (err) {
-      // Usuario canceló, salir del bucle
-      break;
-    }
-  }
-  
-  if (modo === 'edit' && existingItemIndex !== null) {
-    // Reemplazar el ítem existente por los nuevos
-    pedidoActual.splice(existingItemIndex, 1, ...nuevosItems);
-  } else {
-    // Modo normal: agregar todos al final
-    pedidoActual.push(...nuevosItems);
-  }
-  
-  mostrarResumenPedido();
-}*/
+
 async function agregarUnidadesConPersonalizacion(producto, cantidad) {
   for (let i = 0; i < cantidad; i++) {
     try {
@@ -1108,26 +855,7 @@ async function agregarUnidadesConPersonalizacion(producto, cantidad) {
   }
   mostrarResumenPedido();
 }
-/*async function agregarUnidadesConPersonalizacion(producto, cantidad) {
-  for (let i = 0; i < cantidad; i++) {
-    try {
-      const personalizacion = await abrirModalPersonalizacionConPromesa(producto);
-      const precioFormat = `Precio: $${producto.Precio}`;
-      pedidoActual.push({
-        idProducto: producto.IdProducto,
-        nombre: personalizacion.nombreCustomizado,
-        precio: precioFormat,
-        cantidad: 1,
-        personalizado: { tipoLeche: personalizacion.tipoLeche, shots: personalizacion.shots }
-      });
-    } catch (err) {
-      // Usuario canceló, salir del bucle
-      break;
-    }
-  }
-  mostrarResumenPedido();
-}*/
-//fin agreg powa
+
 
 function agregarFilaIngredienteReceta(idInsumo = '', cantidad = '') {
   const div = document.createElement('div');
