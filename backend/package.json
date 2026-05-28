@@ -1,0 +1,38 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "testMatch": [
+      "**/src/tests/**/*Test.js"
+    ],
+    "testEnvironment": "node",
+    "verbose": true
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.6.2",
+    "mssql": "^12.5.4",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.7",
+    "tedious": "^19.2.1"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1",
+    "supertest": "^7.2.2"
+  }
+}

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver_db
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=CoffeeTrack2026!
+    volumes:
+      - ./database/sql:/scripts
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_nosql
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./database/nosql/02-init-mongo.js:/docker-entrypoint-initdb.d/02-init-mongo.js
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./database/sql:/scripts
+    entrypoint: >
+      /bin/bash -c "
+      echo 'Esperando SQL Server...';
+      sleep 25;
+      /opt/mssql-tools/bin/sqlcmd
+      -S sqlserver
+      -U sa
+      -P 'CoffeeTrack2026!'
+      -i /scripts/01_schema_inicial.sql;
+      echo 'Base de datos inicializada';
+      "
