@@ -4,6 +4,8 @@ let pedidoActual = [];
 let allProducts = [];
 let clienteSeleccionadoNombre = '';
 let listaInsumosGlobal = [];
+let pendingPersonalizationResolver = null;
+let pendingPersonalizationRejecter = null;
 
 const resumenModal = document.getElementById('resumenModal');
 const listaPedidoModal = document.getElementById('listaPedidoModal');
@@ -369,8 +371,72 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
     abrirEditarRecetaModal(idProducto);
     return;
   }
+if (target.classList.contains('ok')) {
+  if (target.disabled) return;
+  
+  const idProducto = parseInt(card.dataset.id, 10);
+  const cantidadInput = card.querySelector('.producto-cantidad');
+  let cantidad = parseInt(cantidadInput.value, 10);
+  if (isNaN(cantidad) || cantidad < 1) return alert('Cantidad inválida');
 
-  if (target.classList.contains('ok')) {
+  const productObj = allProducts.find(p => p.IdProducto === idProducto);
+  const esBebida = productObj && (productObj.Categoria === 'Bebidas' || (productObj.Categorium && productObj.Categorium.Nombre === 'Bebidas'));
+//nuevo if bebida
+if (esBebida) {
+  const idCliente = document.getElementById('idClienteFinal').value;
+  if (!idCliente) {
+    alert('⚠️ Selecciona un cliente o mesa primero.');
+    clienteInitModal.style.display = 'flex';
+    return;
+  }
+  target.disabled = true;
+  target.style.backgroundColor = '#ccc';
+  target.style.cursor = 'default';
+  await agregarUnidadesConPersonalizacion(productObj, cantidad);  // SIN EL 'add'
+}
+//fin ver 2
+  /*if (esBebida) {
+  const idCliente = document.getElementById('idClienteFinal').value;
+  if (!idCliente) {
+    alert('⚠️ Selecciona un cliente o mesa primero.');
+    clienteInitModal.style.display = 'flex';
+    return;
+  }
+  target.disabled = true;
+  target.style.backgroundColor = '#ccc';
+  target.style.cursor = 'default';
+  await agregarUnidadesConPersonalizacion(productObj, cantidad, 'add');
+}*/
+//fin ver 1
+  /*if (esBebida) {
+    const idCliente = document.getElementById('idClienteFinal').value;
+    if (!idCliente) {
+      alert('⚠️ Selecciona un cliente o mesa primero.');
+      clienteInitModal.style.display = 'flex';
+      return;
+    }
+    target.disabled = true;
+    target.style.backgroundColor = '#ccc';
+    target.style.cursor = 'default';
+    await agregarUnidadesConPersonalizacion(productObj, cantidad);
+  }*/ 
+  else {
+    // Producto normal (no bebida)
+    const nombre = card.querySelector('.producto-nombre').textContent.trim();
+    const precio = card.querySelector('.producto-precio').textContent.trim();
+    const existente = pedidoActual.find(p => p.idProducto === idProducto);
+    if (existente) {
+      existente.cantidad += cantidad;
+    } else {
+      pedidoActual.push({ idProducto, nombre, precio, cantidad });
+    }
+    target.disabled = true;
+    target.style.backgroundColor = '#ccc';
+    target.style.cursor = 'default';
+    mostrarResumenPedido();
+  }
+}
+  /*if (target.classList.contains('ok')) {
     if (target.disabled) return;
 
     const idProducto = parseInt(card.dataset.id, 10);
@@ -393,7 +459,8 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
       }
 
       // Abrir Modal de Personalización
-      const personalizadoModal = document.getElementById('personalizadoModal');
+       
+     /* const personalizadoModal = document.getElementById('personalizadoModal');
       const persNombreProducto = document.getElementById('persNombreProducto');
       const persLeche = document.getElementById('persLeche');
       const persShotsInput = document.getElementById('persShots');
@@ -419,7 +486,7 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
       });
 
       personalizadoModal.style.display = 'flex';
-      return;
+      return; XXXXXXXXXXXXXXXXXXX
     }
 
     const existente = pedidoActual.find(p => p.idProducto === idProducto);
@@ -432,9 +499,120 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
       target.style.cursor = 'default';
     }
     mostrarResumenPedido();
-  }
+  }*/
+ // nuevo edit
+if (target.classList.contains('edit')) {
+  const idProducto = parseInt(card.dataset.id, 10);
+  const cantidadInput = card.querySelector('.producto-cantidad');
+  let nuevaCantidad = parseInt(cantidadInput.value, 10);
+  if (isNaN(nuevaCantidad) || nuevaCantidad < 1) return alert('Cantidad inválida');
 
-  if (target.classList.contains('edit')) {
+  const productObj = allProducts.find(p => p.IdProducto === idProducto);
+  const esBebida = productObj && (productObj.Categoria === 'Bebidas' || (productObj.Categorium && productObj.Categorium.Nombre === 'Bebidas'));
+
+  if (esBebida) {
+    // Buscar TODOS los índices de ítems con este idProducto
+    const indicesAEliminar = [];
+    pedidoActual.forEach((item, idx) => {
+      if (item.idProducto === idProducto && item.personalizado) {
+        indicesAEliminar.push(idx);
+      }
+    });
+    
+    if (indicesAEliminar.length === 0) {
+      alert('Este producto no está en el pedido. Agrégalo primero con ✔');
+      return;
+    }
+    
+    // Eliminar TODOS los ítems encontrados (de atrás hacia adelante para no afectar índices)
+    for (let i = indicesAEliminar.length - 1; i >= 0; i--) {
+      pedidoActual.splice(indicesAEliminar[i], 1);
+    }
+    
+    // Guardar referencia al botón OK de la tarjeta
+    const okButton = card.querySelector('.ok');
+    if (okButton) {
+      okButton.disabled = true;
+      okButton.style.backgroundColor = '#ccc';
+      okButton.style.cursor = 'default';
+    }
+    
+    // Llamar a la función en modo 'add' (agregar los nuevos)
+    await agregarUnidadesConPersonalizacion(productObj, nuevaCantidad, 'add');
+  } else {
+    const existente = pedidoActual.find(p => p.idProducto === idProducto);
+    if (existente) {
+      existente.cantidad = nuevaCantidad;
+      mostrarResumenPedido();
+      alert('Cantidad actualizada.');
+    } else {
+      alert('Producto no añadido aún. Usa ✔ primero.');
+    }
+  }
+}
+ //fin ver 2
+/* if (target.classList.contains('edit')) {
+  const idProducto = parseInt(card.dataset.id, 10);
+  const cantidadInput = card.querySelector('.producto-cantidad');
+  let nuevaCantidad = parseInt(cantidadInput.value, 10);
+  if (isNaN(nuevaCantidad) || nuevaCantidad < 1) return alert('Cantidad inválida');
+
+  const productObj = allProducts.find(p => p.IdProducto === idProducto);
+  const esBebida = productObj && (productObj.Categoria === 'Bebidas' || (productObj.Categorium && productObj.Categorium.Nombre === 'Bebidas'));
+
+  if (esBebida) {
+  // Buscar el PRIMER ítem con este id y que tenga personalización
+  const existingIndex = pedidoActual.findIndex(item => item.idProducto === idProducto && item.personalizado);
+  if (existingIndex === -1) {
+    alert('Este producto no está en el pedido. Agrégalo primero con ✔');
+    return;
+  }
+  
+  // Guardar referencia al botón OK de la tarjeta
+  const okButton = card.querySelector('.ok');
+  if (okButton) {
+    okButton.disabled = true;
+    okButton.style.backgroundColor = '#ccc';
+    okButton.style.cursor = 'default';
+  }
+  
+  // Llamar a la función en modo 'edit' pasando el índice del ítem a reemplazar
+  await agregarUnidadesConPersonalizacion(productObj, nuevaCantidad, 'edit', existingIndex);
+}
+  /*if (esBebida) {
+    // Buscar el primer ítem con este id y que tenga personalización
+    const existingIndex = pedidoActual.findIndex(item => item.idProducto === idProducto && item.personalizado);
+    if (existingIndex === -1) {
+      alert('Este producto no está en el pedido. Agrégalo primero con ✔');
+      return;
+    }
+    // Eliminar el ítem existente
+    pedidoActual.splice(existingIndex, 1);
+    
+    // Deshabilitar botón OK de la tarjeta
+    const okButton = card.querySelector('.ok');
+    if (okButton) {
+      okButton.disabled = true;
+      okButton.style.backgroundColor = '#ccc';
+      okButton.style.cursor = 'default';
+    }
+    
+    await agregarUnidadesConPersonalizacion(productObj, nuevaCantidad);
+  } 
+  
+  else {
+    const existente = pedidoActual.find(p => p.idProducto === idProducto);
+    if (existente) {
+      existente.cantidad = nuevaCantidad;
+      mostrarResumenPedido();
+      alert('Cantidad actualizada.');
+    } else {
+      alert('Producto no añadido aún. Usa ✔ primero.');
+    }
+  }
+}*/
+ //fin nuevo edit
+  /*if (target.classList.contains('edit')) {
     const idProducto = parseInt(card.dataset.id, 10);
     const cantidadInput = card.querySelector('.producto-cantidad');
     const nuevaCantidad = parseInt(cantidadInput.value, 10);
@@ -449,7 +627,7 @@ document.getElementById('productsContainer').addEventListener('click', async (e)
     } else {
       alert('Producto no añadido aún. Usa ✔ primero.');
     }
-  }
+  }*/
 
   if (target.classList.contains('delete')) {
     const idProducto = parseInt(card.dataset.id, 10);
@@ -679,7 +857,32 @@ window.addEventListener('click', (event) => {
 });
 
 // Enviar el pedido personalizado al backend
+// Enviar el pedido personalizado al backend (MODIFICADO PARA PROMESAS)
 if (formPersonalizado) {
+  formPersonalizado.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!pendingPersonalizationResolver) return;
+
+    const tipoLeche = document.getElementById('persLeche').value;
+    const shots = parseInt(document.getElementById('persShots').value, 10);
+    let descLeche = 'Sin leche';
+    if (tipoLeche !== 'Sin Leche') {
+      const milkOption = document.querySelector('#persLeche option:checked');
+      descLeche = milkOption ? `Leche: ${milkOption.textContent.trim()}` : 'Leche';
+    }
+    const descShots = shots === 0 ? 'Sin espresso' : `${shots} Shot(s)`;
+    const nombreCustomizado = `${document.getElementById('persNombreProducto').textContent} (${descLeche}, ${descShots})`;
+
+    pendingPersonalizationResolver({
+      tipoLeche,
+      shots,
+      nombreCustomizado
+    });
+    document.getElementById('personalizadoModal').style.display = 'none';
+    pendingPersonalizationResolver = null;
+  });
+}
+/*if (formPersonalizado) {
   formPersonalizado.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -735,7 +938,18 @@ if (formPersonalizado) {
     // Abrir de forma inmediata el modal de resumen/detalles de pedido
     mostrarResumenPedido();
   });
+}*/
+function rechazarPersonalizacion() {
+  if (pendingPersonalizationRejecter) {
+    pendingPersonalizationRejecter(new Error('cancelado'));
+    pendingPersonalizationRejecter = null;
+  }
+  document.getElementById('personalizadoModal').style.display = 'none';
 }
+
+// Asociar a los botones de cierre (busca estos elementos o agrégalos si no existen)
+document.getElementById('btnClosePersonalizado')?.addEventListener('click', rechazarPersonalizacion);
+document.getElementById('btnCancelarPersonalizado')?.addEventListener('click', rechazarPersonalizacion);
 
 // ==========================================
 // FUNCIONALIDAD DE EDICIÓN DE RECETA EN VIVO
@@ -790,6 +1004,130 @@ async function abrirEditarRecetaModal(idProducto) {
 
   recetaModal.style.display = 'flex';
 }
+//funcion 
+function abrirModalPersonalizacionConPromesa(producto, valoresActuales = null) {
+  return new Promise((resolve, reject) => {
+    const modal = document.getElementById('personalizadoModal');
+    const persNombreProducto = document.getElementById('persNombreProducto');
+    const persLeche = document.getElementById('persLeche');
+    const persShotsInput = document.getElementById('persShots');
+
+    persNombreProducto.textContent = producto.Nombre;
+    persNombreProducto.dataset.id = producto.IdProducto;
+
+    if (valoresActuales) {
+      persLeche.value = valoresActuales.tipoLeche || 'Sin Leche';
+      persShotsInput.value = valoresActuales.shots || 1;
+      // Resaltar botón de shots
+      document.querySelectorAll('.shot-btn').forEach(btn => {
+        const val = parseInt(btn.dataset.value);
+        if (val === (valoresActuales.shots || 1)) {
+          btn.classList.add('active');
+          btn.style.border = '2px solid #8d6e63';
+          btn.style.background = '#efebe9';
+          btn.style.color = '#5d4037';
+        } else {
+          btn.classList.remove('active');
+          btn.style.border = '2px solid #eae1db';
+          btn.style.background = 'white';
+          btn.style.color = '#795548';
+        }
+      });
+    } else {
+      persLeche.value = 'Sin Leche';
+      persShotsInput.value = '1';
+      document.querySelectorAll('.shot-btn').forEach(btn => {
+        if (btn.dataset.value === '1') {
+          btn.classList.add('active');
+          btn.style.border = '2px solid #8d6e63';
+          btn.style.background = '#efebe9';
+          btn.style.color = '#5d4037';
+        } else {
+          btn.classList.remove('active');
+          btn.style.border = '2px solid #eae1db';
+          btn.style.background = 'white';
+          btn.style.color = '#795548';
+        }
+      });
+    }
+
+    pendingPersonalizationResolver = resolve;
+    pendingPersonalizationRejecter = reject;
+    modal.style.display = 'flex';
+  });
+}
+
+//funcion agregada powa 2/27/26 7:01
+//funcion agregada powa 2/27/26 7:01 (MODIFICADA PARA EDITAR)
+/*async function agregarUnidadesConPersonalizacion(producto, cantidad, modo = 'add', existingItemIndex = null) {
+  const nuevosItems = [];
+  
+  for (let i = 0; i < cantidad; i++) {
+    try {
+      const personalizacion = await abrirModalPersonalizacionConPromesa(producto);
+      const precioFormat = `Precio: $${producto.Precio}`;
+      nuevosItems.push({
+        idProducto: producto.IdProducto,
+        nombre: personalizacion.nombreCustomizado,
+        precio: precioFormat,
+        cantidad: 1,
+        personalizado: { tipoLeche: personalizacion.tipoLeche, shots: personalizacion.shots }
+      });
+    } catch (err) {
+      // Usuario canceló, salir del bucle
+      break;
+    }
+  }
+  
+  if (modo === 'edit' && existingItemIndex !== null) {
+    // Reemplazar el ítem existente por los nuevos
+    pedidoActual.splice(existingItemIndex, 1, ...nuevosItems);
+  } else {
+    // Modo normal: agregar todos al final
+    pedidoActual.push(...nuevosItems);
+  }
+  
+  mostrarResumenPedido();
+}*/
+async function agregarUnidadesConPersonalizacion(producto, cantidad) {
+  for (let i = 0; i < cantidad; i++) {
+    try {
+      const personalizacion = await abrirModalPersonalizacionConPromesa(producto);
+      const precioFormat = `Precio: $${producto.Precio}`;
+      pedidoActual.push({
+        idProducto: producto.IdProducto,
+        nombre: personalizacion.nombreCustomizado,
+        precio: precioFormat,
+        cantidad: 1,
+        personalizado: { tipoLeche: personalizacion.tipoLeche, shots: personalizacion.shots }
+      });
+    } catch (err) {
+      // Usuario canceló, salir del bucle
+      break;
+    }
+  }
+  mostrarResumenPedido();
+}
+/*async function agregarUnidadesConPersonalizacion(producto, cantidad) {
+  for (let i = 0; i < cantidad; i++) {
+    try {
+      const personalizacion = await abrirModalPersonalizacionConPromesa(producto);
+      const precioFormat = `Precio: $${producto.Precio}`;
+      pedidoActual.push({
+        idProducto: producto.IdProducto,
+        nombre: personalizacion.nombreCustomizado,
+        precio: precioFormat,
+        cantidad: 1,
+        personalizado: { tipoLeche: personalizacion.tipoLeche, shots: personalizacion.shots }
+      });
+    } catch (err) {
+      // Usuario canceló, salir del bucle
+      break;
+    }
+  }
+  mostrarResumenPedido();
+}*/
+//fin agreg powa
 
 function agregarFilaIngredienteReceta(idInsumo = '', cantidad = '') {
   const div = document.createElement('div');
@@ -814,6 +1152,7 @@ function agregarFilaIngredienteReceta(idInsumo = '', cantidad = '') {
 
   document.getElementById('recetaIngredientesContainer').appendChild(div);
 }
+
 
 // Evento para agregar filas vacías en el modal de receta
 if (btnRecetaAgregarIngrediente) {
