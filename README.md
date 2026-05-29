@@ -76,7 +76,7 @@ Servidor Express iniciado en: http://localhost:3000
 ### Paso 4: Abrir la Interfaz Visual (Frontend)
 La interfaz gráfica contiene todas las pantallas de interacción para los meseros y administradores (archivos HTML/JS estáticos).
 
-1. En Visual Studio Code, busca el archivo principal de la interfaz dentro de la carpeta `frontend/` (por lo general `index.html`).
+1. En Visual Studio Code, busca el archivo principal de la interfaz dentro de la carpeta `frontend/` , siendo `InicioDeSesion.html`.
 2. Dale clic derecho al archivo y selecciona **Open with Live Server** (o presiona el botón **Go Live** en la barra inferior de VS Code).
-3. El sistema se desplegará automáticamente en tu navegador web en la dirección local que te asigne la extensión (normalmente `http://127.0.0.1:5500/frontend/index.html`).
+3. El sistema se desplegará automáticamente en tu navegador web en la dirección local que te asigne la extensión : `http://127.0.0.1:5500/frontend/InicioDeSesion.html`.
 4. ¡Listo! La interfaz ya está conectada e interactuando en tiempo real con la API del backend en el puerto 3000.
