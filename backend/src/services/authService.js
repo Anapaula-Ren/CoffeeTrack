@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const usuariosModel = require('../models/usuariosModel');
 const { AppError } = require('../middleware/errorHandler');
-
+const ActividadLog = require('../models/ActividadLog');
 const LoginLog = require('../models/LoginLog');
 
 console.log('Login');
@@ -57,6 +57,16 @@ class AuthService {
         ip: 'LOCAL'
 
       });
+
+      await ActividadLog.create({
+
+    tipo: 'LOGIN',
+
+    usuario: usuario.Correo,
+
+    descripcion: 'Inicio de sesión exitoso'
+
+});
 
     } catch (mongoError) {
 

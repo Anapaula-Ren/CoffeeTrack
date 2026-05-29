@@ -1,6 +1,8 @@
 const pedidosModel = require('../models/pedidosModel');
 const nodemailer = require('nodemailer');
 const { AppError } = require('../middleware/errorHandler');
+const VentaLog = require('../models/VentaLog');
+const ActividadLog = require('../models/ActividadLog');
 
 class PedidosService {
   async obtenerPedidosPendientes() {
@@ -67,13 +69,56 @@ class PedidosService {
     return await pedidosModel.obtenerTiposLeche();
   }
 
-  async crearPedido(data) {
-    return await pedidosModel.crearPedido(data);
-  }
+async crearPedido(data) {
 
-  async crearPedidoPersonalizado(data) {
-    return await pedidosModel.crearPedidoPersonalizado(data);
-  }
+    console.log('DATA PEDIDO');
+
+    console.log(data);
+
+    const pedido = await pedidosModel.crearPedido(data);
+
+    try {
+
+        console.log('INTENTANDO GUARDAR LOG');
+
+        const log = await VentaLog.create({
+
+            usuario: data.usuarioRol || data.idUsuario,
+
+            productos: data.productos || [],
+
+            total: data.total || 0
+
+        });
+
+        await ActividadLog.create({
+
+    tipo: 'VENTA',
+
+    usuario: String(
+        data.usuarioRol || data.idUsuario
+    ),
+
+    descripcion: 'Venta realizada',
+
+    total: data.total || 0
+
+});
+
+        console.log('LOG GUARDADO');
+
+        console.log(log);
+
+    } catch (mongoError) {
+
+        console.log('ERROR MONGO');
+
+        console.log(mongoError);
+
+    }
+
+    return pedido;
+}
 
   async enviarTicket({ orderId, email, orderSummary, details }) {
     const emailUser = process.env.EMAIL || process.env.EMAIL_USER;
