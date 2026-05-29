@@ -58,6 +58,19 @@ class PedidosController {
     }
   }
 
+  async deshecharPedido(req, res, next) {
+    const { id } = req.params;
+    try {
+      const affected = await pedidosService.deshecharPedido(id);
+      if (affected === 0) {
+        return res.status(404).json({ success: false, message: 'Pedido no encontrado.' });
+      }
+      res.json({ success: true, message: 'Estado del pedido actualizado a Deshechado.' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async crearPedido(req, res, next) {
     try {
       const result = await pedidosService.crearPedido(req.body);

@@ -113,6 +113,14 @@ class PedidosModel {
     return affected[0];
   }
 
+  static async deshecharPedido(id) {
+    const affected = await Pedido.update(
+      { Estado: 'Deshechado' },
+      { where: { IdPedido: id } }
+    );
+    return affected[0];
+  }
+
   static async obtenerTiposLeche() {
     return [
       { IdLeche: 'Entera', Nombre: 'Entera' },
@@ -121,76 +129,109 @@ class PedidosModel {
     ];
   }
 
-  static async crearPedido({ idCliente, total, idUsuario, productos }) {
-    const t = await sequelize.transaction();
-    try {
+static async crearPedido({ idCliente, total, idUsuario, productos }) {
+  const t = await sequelize.transaction();
+  try {
 
-      const [ivaRes] = await sequelize.query(
-        'SELECT cafeteriadb.CalcularIVA(:total) AS iva',
-        { replacements: { total }, type: Sequelize.QueryTypes.SELECT, transaction: t }
-      );
-      const iva = parseFloat(ivaRes.iva);
-      const totalConIVA = parseFloat((parseFloat(total) + iva).toFixed(2));
+    // ── PASO 1: VALIDAR DISPONIBILIDAD ───────────────────────────────────
+    for (const prod of productos) {
+      const productoInfo = await Producto.findByPk(prod.id, { transaction: t });
+      if (!productoInfo) {
+        throw new Error(`Producto con ID ${prod.id} no encontrado.`);
+      }
 
-      const newPedido = await Pedido.create({
-        IdCliente: idCliente,
-        Total: totalConIVA,
-        IdUsuario: idUsuario,
-        Estado: 'Pendiente'
-      }, { transaction: t });
+      const receta = await Receta.findAll({
+        where: { IdProducto: prod.id },
+        transaction: t
+      });
 
-      const idPedido = newPedido.IdPedido;
-
-      for (const prod of productos) {
-        const newDetalle = await DetallePedido.create({
-          IdPedido: idPedido,
-          IdProducto: prod.id,
-          Cantidad: prod.cantidad,
-          Subtotal: prod.subtotal
-        }, { transaction: t });
-
-        if (prod.personalizado) {
-          const { tipoLeche, shots } = prod.personalizado;
-
-          const baseRecipe = await Receta.findAll({
-            where: { IdProducto: prod.id },
-            transaction: t
-          });
-
-          const allMilkInventarioIds = [4, 5, 6];
-
-          const originalMilkInsumo = baseRecipe.find(item => allMilkInventarioIds.includes(item.IdInventario));
-
-          if (originalMilkInsumo) {
-            await Inventario.increment(
-              { Cantidad: parseFloat(originalMilkInsumo.CantidadInsumo) },
-              { where: { IdInventario: originalMilkInsumo.IdInventario }, transaction: t }
-            );
-          }
-
-          await sequelize.query(
-            'EXEC cafeteriadb.sp_personalizar_bebida @IdDetalle = :idDetalle, @TipoLeche = :tipoLeche, @CantidadShots = :cantidadShots',
-            {
-              replacements: {
-                idDetalle: newDetalle.IdDetalle,
-                tipoLeche: tipoLeche || 'Sin Leche',
-                cantidadShots: shots || 1
-              },
-              type: Sequelize.QueryTypes.RAW,
-              transaction: t
-            }
+      // Todo producto (bebida o comida) valida por receta
+      for (const insumo of receta) {
+        const insumoInfo = await Inventario.findByPk(insumo.IdInventario, { transaction: t });
+        if (!insumoInfo) {
+          throw new Error(`Insumo ID ${insumo.IdInventario} no encontrado en inventario.`);
+        }
+        const cantidadNecesaria = parseFloat(insumo.CantidadInsumo) * prod.cantidad;
+        if (parseFloat(insumoInfo.Cantidad) < cantidadNecesaria) {
+          throw new Error(
+            `Stock insuficiente de "${insumoInfo.NombreProducto}" para "${productoInfo.Nombre}". ` +
+            `Disponible: ${parseFloat(insumoInfo.Cantidad).toFixed(3)}, ` +
+            `requerido: ${cantidadNecesaria.toFixed(3)}.`
           );
         }
       }
-
-      await t.commit();
-      return { idPedido, totalConIVA };
-
-    } catch (error) {
-      await t.rollback();
-      throw error;
     }
+
+    // ── PASO 2: CREAR EL PEDIDO ──────────────────────────────────────────
+    const [ivaRes] = await sequelize.query(
+      'SELECT cafeteriadb.CalcularIVA(:total) AS iva',
+      { replacements: { total }, type: Sequelize.QueryTypes.SELECT, transaction: t }
+    );
+    const iva = parseFloat(ivaRes.iva);
+    const totalConIVA = parseFloat((parseFloat(total) + iva).toFixed(2));
+
+    const newPedido = await Pedido.create({
+      IdCliente: idCliente,
+      Total: totalConIVA,
+      IdUsuario: idUsuario,
+      Estado: 'Pendiente'
+    }, { transaction: t });
+
+    const idPedido = newPedido.IdPedido;
+
+    // ── PASO 3: REGISTRAR DETALLES ───────────────────────────────────────
+    const allMilkInventarioIds = [4, 5, 6];
+
+    for (const prod of productos) {
+      const newDetalle = await DetallePedido.create({
+        IdPedido: idPedido,
+        IdProducto: prod.id,
+        Cantidad: prod.cantidad,
+        Subtotal: prod.subtotal
+      }, { transaction: t });
+
+      if (prod.personalizado) {
+        const receta = await Receta.findAll({
+          where: { IdProducto: prod.id },
+          transaction: t
+        });
+
+        const originalMilkInsumo = receta.find(item => allMilkInventarioIds.includes(item.IdInventario));
+        if (originalMilkInsumo) {
+          await Inventario.increment(
+            { Cantidad: parseFloat(originalMilkInsumo.CantidadInsumo) * prod.cantidad },
+            { where: { IdInventario: originalMilkInsumo.IdInventario }, transaction: t }
+          );
+        }
+
+        const { tipoLeche, shots } = prod.personalizado;
+        await sequelize.query(
+          'EXEC cafeteriadb.sp_personalizar_bebida @IdDetalle = :idDetalle, @TipoLeche = :tipoLeche, @CantidadShots = :cantidadShots',
+          {
+            replacements: {
+              idDetalle: newDetalle.IdDetalle,
+              tipoLeche: tipoLeche || 'Sin Leche',
+              cantidadShots: shots || 1
+            },
+            type: Sequelize.QueryTypes.RAW,
+            transaction: t
+          }
+        );
+      }
+    }
+
+    await t.commit();
+    return { idPedido, totalConIVA };
+
+  } 
+  catch (error) {
+    if (t && !t.finished) {
+      await t.rollback();
+    }
+    throw error;
   }
+}
+
 
   static async crearPedidoPersonalizado({ idProducto, tipoLeche, shots, idCliente, idUsuario }) {
     const t = await sequelize.transaction();

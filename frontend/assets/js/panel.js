@@ -2,12 +2,7 @@ const API_URL = 'http://localhost:3000';
 
 const userRole = localStorage.getItem('usuarioRol');
 
-if (userRole === 'Encargado de inventario') {
-  const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
-  const panelLink = document.querySelector('nav a[href*="Panel.html"]');
-  if (pedidosLink) pedidosLink.style.display = 'none';
-  if (panelLink) panelLink.style.display = 'none';
-}
+
 
 document.getElementById('btnCerrarSesion')
   ?.addEventListener('click', function (e) {
@@ -18,14 +13,50 @@ document.getElementById('btnCerrarSesion')
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const rol = localStorage.getItem('usuarioRol');
-
-  if (rol === 'Administrador') {
-    document.getElementById('btnReportes').style.display = 'block';
-    const linkUsuarios = document.getElementById('linkUsuarios');
-    if (linkUsuarios) linkUsuarios.style.display = 'inline-block';
+  
+  if (userRole === 'Encargado de inventario') {
+    const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
+    const panelLink = document.querySelector('nav a[href*="Panel.html"]');
+    if (pedidosLink) pedidosLink.style.display = 'none';
+    if (panelLink) panelLink.style.display = 'none';
+  }
+  
+  if (userRole === 'Cajero/Mesero') {
+    const inventarioLink = document.querySelector('nav a[href*="Inventario"]');
+    if (inventarioLink) inventarioLink.style.display = 'none';
   }
 
+  if (userRole === 'Administrador') {
+    const linkUsuarios = document.getElementById('linkUsuarios');
+    if (linkUsuarios) linkUsuarios.style.display = 'inline-block';
+    // ELIMINADO: btnAddProduct no existe en Panel.html
+  }
+  
+  // Mostrar botón de reportes para Admin y Encargado de inventario
+  /*const btnReportes = document.getElementById('btnReportes');
+  if (btnReportes && (userRole === 'Administrador' || userRole === 'Encargado de inventario')) {
+    btnReportes.style.display = 'inline-flex';
+  }*/
+ /* const rol = localStorage.getItem('usuarioRol');
+
+  if (userRole === 'Encargado de inventario') {
+    const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
+    const panelLink = document.querySelector('nav a[href*="Panel.html"]');
+    if (pedidosLink) pedidosLink.style.display = 'none';
+    if (panelLink) panelLink.style.display = 'none';
+  }
+  
+  if (userRole === 'Cajero/Mesero') {
+    const inventarioLink = document.querySelector('nav a[href*="Inventario"]');
+    if (inventarioLink) inventarioLink.style.display = 'none';
+  }
+
+  if (userRole === 'Administrador') {
+    const linkUsuarios = document.getElementById('linkUsuarios');
+    if (linkUsuarios) linkUsuarios.style.display = 'inline-block';
+    if (btnAddProduct) btnAddProduct.style.display = 'inline-block';
+  }*/
+  
   loadOrderList();
   setupModales();
   setupTopProductos();
@@ -127,6 +158,10 @@ async function showOrderDetail(orderId, orderSummary) {
           style="background-color:#4CAF50; color:white; padding:10px 15px; border:none; border-radius:4px; cursor:pointer; margin-top:15px; width:100%;">
           PEDIDO COMPLETADO
         </button>
+        <button id="discardOrderBtn"
+          style="background-color:#D32F2F; color:white; padding:10px 15px; border:none; border-radius:4px; cursor:pointer; margin-top:10px; width:100%;">
+          DESHECHAR PEDIDO
+        </button>
         <button id="sendTicketBtn"
           style="background-color:#2196F3; color:white; padding:10px 15px; border:none; border-radius:4px; cursor:pointer; margin-top:10px; width:100%;">
           <i class="fas fa-ticket-alt"></i> ENVIAR TICKET
@@ -151,6 +186,16 @@ async function showOrderDetail(orderId, orderSummary) {
             markOrderAsCompleted(orderId, activeRow);
           }
         });
+      });
+
+    document.getElementById('discardOrderBtn')
+      ?.addEventListener('click', () => {
+        confirm(`¿Deshechar el Pedido #${orderId}? El pedido se marcará como DESHECHADO y no se podrá revertir.`)
+          .then((accepted) => {
+            if (accepted) {
+              deshecharOrder(orderId, activeRow);
+            }
+          });
       });
 
     document.getElementById('sendTicketBtn')
@@ -180,6 +225,28 @@ async function markOrderAsCompleted(orderId, rowElement) {
   } catch (error) {
     hideLoader();
     alert(`Error: No se pudo completar el pedido. ${error.message}`);
+  }
+}
+
+async function deshecharOrder(orderId, rowElement) {
+  showLoader('Deshechando pedido...');
+  try {
+    const response = await fetch(`${API_URL}/api/pedidos/${orderId}/deshechar`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    hideLoader();
+
+    if (!response.ok) throw new Error('Fallo la actualización en el servidor.');
+
+    if (rowElement) rowElement.style.display = 'none';
+    orderDetailContent.innerHTML = '<p style="color:#d32f2f; font-weight:bold;">❌ Pedido Deshechado</p>';
+    alert(`Pedido #${orderId} marcado como DESHECHADO`);
+
+  } catch (error) {
+    hideLoader();
+    alert(`Error: No se pudo deshechar el pedido. ${error.message}`);
   }
 }
 
