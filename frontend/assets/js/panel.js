@@ -2,12 +2,7 @@ const API_URL = 'http://localhost:3000';
 
 const userRole = localStorage.getItem('usuarioRol');
 
-if (userRole === 'Encargado de inventario') {
-  const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
-  const panelLink = document.querySelector('nav a[href*="Panel.html"]');
-  if (pedidosLink) pedidosLink.style.display = 'none';
-  if (panelLink) panelLink.style.display = 'none';
-}
+
 
 document.getElementById('btnCerrarSesion')
   ?.addEventListener('click', function (e) {
@@ -18,14 +13,50 @@ document.getElementById('btnCerrarSesion')
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const rol = localStorage.getItem('usuarioRol');
-
-  if (rol === 'Administrador') {
-    document.getElementById('btnReportes').style.display = 'block';
-    const linkUsuarios = document.getElementById('linkUsuarios');
-    if (linkUsuarios) linkUsuarios.style.display = 'inline-block';
+  
+  if (userRole === 'Encargado de inventario') {
+    const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
+    const panelLink = document.querySelector('nav a[href*="Panel.html"]');
+    if (pedidosLink) pedidosLink.style.display = 'none';
+    if (panelLink) panelLink.style.display = 'none';
+  }
+  
+  if (userRole === 'Cajero/Mesero') {
+    const inventarioLink = document.querySelector('nav a[href*="Inventario"]');
+    if (inventarioLink) inventarioLink.style.display = 'none';
   }
 
+  if (userRole === 'Administrador') {
+    const linkUsuarios = document.getElementById('linkUsuarios');
+    if (linkUsuarios) linkUsuarios.style.display = 'inline-block';
+    // ELIMINADO: btnAddProduct no existe en Panel.html
+  }
+  
+  // Mostrar botón de reportes para Admin y Encargado de inventario
+  /*const btnReportes = document.getElementById('btnReportes');
+  if (btnReportes && (userRole === 'Administrador' || userRole === 'Encargado de inventario')) {
+    btnReportes.style.display = 'inline-flex';
+  }*/
+ /* const rol = localStorage.getItem('usuarioRol');
+
+  if (userRole === 'Encargado de inventario') {
+    const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
+    const panelLink = document.querySelector('nav a[href*="Panel.html"]');
+    if (pedidosLink) pedidosLink.style.display = 'none';
+    if (panelLink) panelLink.style.display = 'none';
+  }
+  
+  if (userRole === 'Cajero/Mesero') {
+    const inventarioLink = document.querySelector('nav a[href*="Inventario"]');
+    if (inventarioLink) inventarioLink.style.display = 'none';
+  }
+
+  if (userRole === 'Administrador') {
+    const linkUsuarios = document.getElementById('linkUsuarios');
+    if (linkUsuarios) linkUsuarios.style.display = 'inline-block';
+    if (btnAddProduct) btnAddProduct.style.display = 'inline-block';
+  }*/
+  
   loadOrderList();
   setupModales();
   setupTopProductos();

@@ -8,23 +8,30 @@ function verificarSesion() {
 }
 
 function configurarNavegacion() {
-  const rol = localStorage.getItem('usuarioRol');
+   const userRole = localStorage.getItem('usuarioRol');
 
-  const linkUsuarios = document.getElementById('linkUsuarios');
-  const linkPanel = document.querySelector('nav a[href*="Panel.html"]');
-  const linkPedidos = document.querySelector('nav a[href*="GestionPedidos.html"]');
-
-  if (rol === 'Encargado de inventario') {
-    if (linkPanel) linkPanel.style.display = 'none';
-    if (linkPedidos) linkPedidos.style.display = 'none';
+  if (userRole === 'Encargado de inventario') {
+    const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
+    const panelLink = document.querySelector('nav a[href*="Panel.html"]');
+    const linkUsuarios = document.getElementById('linkUsuarios');
+    if (pedidosLink) pedidosLink.style.display = 'none';
+    if (panelLink) panelLink.style.display = 'none';
     if (linkUsuarios) linkUsuarios.style.display = 'none';
-
-  } else if (rol === 'Cajero/Mesero') {
-    if (linkUsuarios) linkUsuarios.style.display = 'none';
-
-  } else if (rol === 'Administrador') {
-    if (linkUsuarios) linkUsuarios.style.display = 'inline-block';
   }
+  
+  if (userRole === 'Cajero/Mesero') {
+    const inventarioLink = document.querySelector('nav a[href*="Inventario"]');
+    const linkUsuarios = document.getElementById('linkUsuarios');
+    if (inventarioLink) inventarioLink.style.display = 'none';
+    if (linkUsuarios) linkUsuarios.style.display = 'none';
+  }
+
+  if (userRole === 'Administrador') {
+    const linkUsuarios = document.getElementById('linkUsuarios');
+    if (linkUsuarios) linkUsuarios.style.display = 'inline-block'; 
+  }
+
+  
 }
 
 function mostrarUsuario() {
@@ -195,3 +202,4 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.removeItem('mostrarAlertaStock');
   }
 });
+

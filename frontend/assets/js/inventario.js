@@ -1,4 +1,27 @@
 const API_URL = 'http://localhost:3000';
+// =============================================
+// VALIDACIÓN DE ROLES PARA OCULTAR ENLACES
+// =============================================
+const userRole = localStorage.getItem('usuarioRol');
+
+// Ocultar enlaces según el rol (esto debe ejecutarse inmediatamente)
+if (userRole === 'Encargado de inventario') {
+  const pedidosLink = document.querySelector('nav a[href*="GestionPedidos.html"]');
+  const panelLink = document.querySelector('nav a[href*="Panel.html"]');
+  if (pedidosLink) pedidosLink.style.display = 'none';
+  if (panelLink) panelLink.style.display = 'none';
+}
+
+if (userRole === 'Cajero/Mesero') {
+  const inventarioLink = document.querySelector('nav a[href*="Inventario"]');
+  if (inventarioLink) inventarioLink.style.display = 'none';
+}
+
+if (userRole === 'Administrador') {
+  const linkUsuarios = document.getElementById('linkUsuarios');
+  if (linkUsuarios) linkUsuarios.style.display = 'inline-block';
+}
+// =============================================
 
 const MAPA_IMAGENES_DEFAULT = {
   // Bebidas
@@ -117,16 +140,6 @@ function renderizarProductos(productos) {
   );
   document.getElementById('btnReporteInventario')
     ?.addEventListener('click', abrirModalReporte);
-}
-
-
-const userRole = localStorage.getItem('usuarioRol');
-
-if (userRole === 'Encargado de inventario') {
-  const pedidosLink = document.querySelector('nav a[href*="Gestion de pedidos.html"]');
-  const panelLink = document.querySelector('nav a[href*="Panel.html"]');
-  if (pedidosLink) pedidosLink.style.display = 'none';
-  if (panelLink) panelLink.style.display = 'none';
 }
 
 const modal = document.getElementById('modal_editar');
@@ -1029,3 +1042,4 @@ function mostrarAlertaStockBajo(stockBajo) {
   mensaje += '\n⚠️ Por favor, revisa el inventario y genera las órdenes necesarias.';
   showCustomAlert('🚨 ATENCIÓN - STOCK BAJO', mensaje);
 }
+
