@@ -113,6 +113,14 @@ class PedidosModel {
     return affected[0];
   }
 
+  static async deshecharPedido(id) {
+    const affected = await Pedido.update(
+      { Estado: 'Deshechado' },
+      { where: { IdPedido: id } }
+    );
+    return affected[0];
+  }
+
   static async obtenerTiposLeche() {
     return [
       { IdLeche: 'Entera', Nombre: 'Entera' },

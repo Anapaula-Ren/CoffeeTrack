@@ -10,6 +10,7 @@ router.post('/personalizado', pedidosController.crearPedidoPersonalizado);
 router.get('/:id/detalle', pedidosController.getDetallePedido);
 router.get('/:id/cliente', pedidosController.getClientePedido);
 router.put('/:id/completar', pedidosController.completarPedido);
+router.put('/:id/deshechar', pedidosController.deshecharPedido);
 router.post('/', pedidosMiddleware.validarCrearPedido, pedidosController.crearPedido);
 router.post('/enviar-ticket', pedidosController.enviarTicket);
 
