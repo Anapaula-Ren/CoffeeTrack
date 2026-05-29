@@ -171,7 +171,7 @@ static async crearPedido({ idCliente, total, idUsuario, productos }) {
 
     const idPedido = newPedido.IdPedido;
 
-    // ── PASO 3: REGISTRAR DETALLES Y DESCONTAR ───────────────────────────
+    // ── PASO 3: REGISTRAR DETALLES ───────────────────────────────────────
     const allMilkInventarioIds = [4, 5, 6];
 
     for (const prod of productos) {
@@ -182,22 +182,18 @@ static async crearPedido({ idCliente, total, idUsuario, productos }) {
         Subtotal: prod.subtotal
       }, { transaction: t });
 
-      const receta = await Receta.findAll({
-        where: { IdProducto: prod.id },
-        transaction: t
-      });
-
       if (prod.personalizado) {
-        // Bebida personalizada: descontar toda la receta EXCEPTO leche,
-        // porque el SP descuenta la leche correcta y el café extra por shots
-        for (const insumo of receta) {
-          if (!allMilkInventarioIds.includes(insumo.IdInventario)) {
-            const cantidadADescontar = parseFloat(insumo.CantidadInsumo) * prod.cantidad;
-            await Inventario.decrement(
-              { Cantidad: cantidadADescontar },
-              { where: { IdInventario: insumo.IdInventario }, transaction: t }
-            );
-          }
+        const receta = await Receta.findAll({
+          where: { IdProducto: prod.id },
+          transaction: t
+        });
+
+        const originalMilkInsumo = receta.find(item => allMilkInventarioIds.includes(item.IdInventario));
+        if (originalMilkInsumo) {
+          await Inventario.increment(
+            { Cantidad: parseFloat(originalMilkInsumo.CantidadInsumo) * prod.cantidad },
+            { where: { IdInventario: originalMilkInsumo.IdInventario }, transaction: t }
+          );
         }
 
         const { tipoLeche, shots } = prod.personalizado;
@@ -213,17 +209,6 @@ static async crearPedido({ idCliente, total, idUsuario, productos }) {
             transaction: t
           }
         );
-
-      } else {
-        // Producto sin personalización (comida o bebida simple):
-        // descontar toda la receta completa
-        for (const insumo of receta) {
-          const cantidadADescontar = parseFloat(insumo.CantidadInsumo) * prod.cantidad;
-          await Inventario.decrement(
-            { Cantidad: cantidadADescontar },
-            { where: { IdInventario: insumo.IdInventario }, transaction: t }
-          );
-        }
       }
     }
 
