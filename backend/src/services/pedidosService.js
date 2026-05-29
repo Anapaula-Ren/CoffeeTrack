@@ -63,6 +63,10 @@ class PedidosService {
     return await pedidosModel.completarPedido(id);
   }
 
+  async deshecharPedido(id) {
+    return await pedidosModel.deshecharPedido(id);
+  }
+
   async obtenerTiposLeche() {
     return await pedidosModel.obtenerTiposLeche();
   }
